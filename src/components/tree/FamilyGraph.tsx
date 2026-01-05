@@ -31,7 +31,7 @@ export const FamilyGraph: React.FC = () => {
     }, [onLayout]);
 
     return (
-        <div style={{ width: '100%', height: '100%' }} className="absolute inset-0 text-black bg-slate-900">
+        <div style={{ width: '100%', height: '100%' }} className="absolute inset-0 text-slate-900 bg-slate-50">
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -41,11 +41,16 @@ export const FamilyGraph: React.FC = () => {
                 fitView
                 minZoom={0.1}
                 maxZoom={1.5}
-                defaultEdgeOptions={{ type: 'smoothstep', animated: true }}
+                defaultEdgeOptions={{ type: 'smoothstep', animated: true, style: { stroke: '#94a3b8', strokeWidth: 2 } }}
             >
-                <Background color="#555" gap={16} />
-                <Controls />
-                <MiniMap style={{background: '#222'}} nodeStrokeColor="#fff" nodeColor="#555" />
+                <Background color="#cbd5e1" gap={16} />
+                <Controls className="bg-white border border-slate-200 shadow-sm text-slate-600 fill-slate-600" />
+                <MiniMap 
+                    style={{background: 'rgba(255,255,255,0.8)', border: '1px solid #e2e8f0'}} 
+                    nodeStrokeColor="#94a3b8" 
+                    nodeColor="#e2e8f0" 
+                    maskColor="rgba(241, 245, 249, 0.6)"
+                />
             </ReactFlow>
         </div>
     );

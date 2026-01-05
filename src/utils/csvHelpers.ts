@@ -29,7 +29,8 @@ const formatDateForExport = (dateStr?: string): string => {
     return dateStr;
 };
 
-export const exportToCSV = (members: Member[], relationships: Relationship[]) => {
+// Generate CSV string from data
+const generateCSVContent = (members: Member[], relationships: Relationship[]) => {
   const data = members.map(m => {
     // Find relationships
     const fatherRel = relationships.find(r => r.targetMemberId === m.id && r.type === 'parent' && members.find(p => p.id === r.sourceMemberId)?.gender === 'male');
@@ -40,8 +41,7 @@ export const exportToCSV = (members: Member[], relationships: Relationship[]) =>
         ? (spouseRel.sourceMemberId === m.id ? spouseRel.targetMemberId : spouseRel.sourceMemberId) 
         : '';
         
-    // Combine name or just use firstName (since we are moving to single name storage in firstName)
-    // If lastName exists, append it? The user wants "姓名", so let's join them if both exist.
+    // Combine name
     const fullName = `${m.lastName || ''}${m.firstName || ''}`;
 
     return {
@@ -60,32 +60,109 @@ export const exportToCSV = (members: Member[], relationships: Relationship[]) =>
     };
   });
 
-  const csv = Papa.unparse(data);
-  // Add BOM for Excel compatibility
-  const blob = new Blob(["\uFEFF"+csv], {type: 'text/csv;charset=utf-8;'});
-  
-  // Use File constructor if supported for better naming hints in some browsers
+  return Papa.unparse(data);
+};
+
+export const exportToCSV = (members: Member[], relationships: Relationship[]) => {
+  const csv = generateCSVContent(members, relationships);
+  const BOM = "\uFEFF";
+  const content = BOM + csv;
   const filename = `family_tree_export_${new Date().toISOString().slice(0,10)}.csv`;
+
+  // Try to use File constructor for better filename handling support
+  let url;
+  try {
+      const file = new File([content], filename, { type: 'text/csv;charset=utf-8' });
+      url = URL.createObjectURL(file);
+  } catch (e) {
+      console.warn('File constructor not supported, falling back to Blob', e);
+      // Fallback
+      const blob = new Blob([content], { type: 'text/csv;charset=utf-8' });
+      url = URL.createObjectURL(blob);
+  }
   
   const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  
   link.href = url;
-  link.download = filename;
-  
-  // Critical for Mobile robustness
-  link.target = "_blank"; 
-  link.setAttribute('download', filename);
+  link.setAttribute('download', filename); 
+  // Force target self to avoid new tab random ID behavior in some browsers
+  link.target = "_self";
   
   document.body.appendChild(link);
+  link.click();
   
   setTimeout(() => {
-    link.click();
-    setTimeout(() => {
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    }, 100);
-  }, 50);
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, 200);
+};
+
+// New function to copy to clipboard
+export const copyCSVToClipboard = async (members: Member[], relationships: Relationship[]): Promise<void> => {
+    const csv = generateCSVContent(members, relationships);
+    try {
+        await navigator.clipboard.writeText(csv);
+        alert('CSV 內容已複製到剪貼簿！您可以直接貼到 Google Sheet 或 Excel 中。');
+    } catch (err) {
+        console.error('Failed to copy', err);
+        // Fallback for insecure context
+        const textArea = document.createElement("textarea");
+        textArea.value = csv;
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            alert('CSV 內容已複製到剪貼簿！');
+        } catch (err) {
+            console.error('Fallback copy failed', err);
+            alert('複製失敗，請手動匯出');
+        }
+        document.body.removeChild(textArea);
+    }
+};
+
+// Generic parser logic
+const processParseResults = (results: any, resolve: any) => {
+    const parsedMembers: Member[] = [];
+    const rawRelationships: any[] = [];
+
+    results.data.forEach((row: any) => {
+       // Skip empty rows
+       if (!row['ID'] && !row['姓名']) return;
+
+       const fullName = (row['姓名'] || '').trim();
+       const firstName = fullName;
+       const lastName = '';
+
+       const genderRaw = row['性別']; 
+       let gender: Gender = 'other';
+       if (genderRaw === 'M' || genderRaw === '男') gender = 'male';
+       else if (genderRaw === 'F' || genderRaw === '女') gender = 'female';
+
+       const member: Member = {
+         id: row['ID'] || uuidv4(),
+         firstName,
+         lastName,
+         gender,
+         title: row['稱謂'],
+         status: row['狀態'],
+         dateOfBirth: normalizeDate(row['出生日期']),
+         dateOfDeath: normalizeDate(row['死亡日期']),
+         location: row['位置'],
+         photoUrl: row['照片URL'],
+         bio: '' 
+       };
+       parsedMembers.push(member);
+
+       rawRelationships.push({
+         memberId: member.id,
+         fatherId: row['父親ID'],
+         motherId: row['母親ID'],
+         spouseId: row['配偶ID']
+       });
+    });
+    
+    resolve({ members: parsedMembers, relationships: rawRelationships });
 };
 
 export const parseCSV = (file: File): Promise<{ members: Member[], relationships: any[] }> => {
@@ -93,53 +170,24 @@ export const parseCSV = (file: File): Promise<{ members: Member[], relationships
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      complete: (results) => {
-        const parsedMembers: Member[] = [];
-        const rawRelationships: any[] = [];
-
-        results.data.forEach((row: any) => {
-           // Skip empty rows
-           if (!row['ID'] && !row['姓名']) return;
-
-           const fullName = (row['姓名'] || '').trim();
-           // User Request: "不用區分姓跟名，姓名是一個欄位". 
-           // Strategy: Store full name in firstName, leave lastName empty.
-           const firstName = fullName;
-           const lastName = '';
-
-           const genderRaw = row['性別']; // Expect M, F, or other
-           let gender: Gender = 'other';
-           if (genderRaw === 'M' || genderRaw === '男') gender = 'male';
-           else if (genderRaw === 'F' || genderRaw === '女') gender = 'female';
-
-           const member: Member = {
-             id: row['ID'] || uuidv4(),
-             firstName,
-             lastName,
-             gender,
-             title: row['稱謂'],
-             status: row['狀態'],
-             dateOfBirth: normalizeDate(row['出生日期']),
-             dateOfDeath: normalizeDate(row['死亡日期']),
-             location: row['位置'],
-             photoUrl: row['照片URL'],
-             bio: '' 
-           };
-           parsedMembers.push(member);
-
-           rawRelationships.push({
-             memberId: member.id,
-             fatherId: row['父親ID'],
-             motherId: row['母親ID'],
-             spouseId: row['配偶ID']
-           });
-        });
-        
-        resolve({ members: parsedMembers, relationships: rawRelationships });
-      },
-      error: (error) => {
-        reject(error);
-      }
+      complete: (results) => processParseResults(results, resolve),
+      error: (error) => reject(error)
     });
   });
+};
+
+export const parseCSVFromURL = (url: string): Promise<{ members: Member[], relationships: any[] }> => {
+    return new Promise((resolve, reject) => {
+        // Add cache-busting timestamp to force fresh fetch
+        const separator = url.includes('?') ? '&' : '?';
+        const freshUrl = `${url}${separator}_t=${Date.now()}`;
+
+        Papa.parse(freshUrl, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => processParseResults(results, resolve),
+            error: (error) => reject(error)
+        });
+    });
 };
