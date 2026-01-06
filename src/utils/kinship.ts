@@ -1,4 +1,4 @@
-import type { Member, Relationship, Gender } from '../types';
+import type { Member, Relationship } from '../types';
 
 type RelationStep = 'father' | 'mother' | 'son' | 'daughter' | 'brother' | 'sister' | 'husband' | 'wife' | 'spouse';
 

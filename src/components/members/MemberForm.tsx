@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useFamilyStore } from '../../store/useFamilyStore';
 import type { Member, Gender } from '../../types';
-import { Heart, Crown, ChevronLeft, X } from 'lucide-react';
+import { Heart, Crown, ChevronLeft } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 interface MemberFormProps {

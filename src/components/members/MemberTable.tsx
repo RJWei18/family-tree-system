@@ -10,7 +10,7 @@ import type { Member } from '../../types';
 import { useFamilyStore } from '../../store/useFamilyStore';
 import { calculateRelationship } from '../../utils/kinship';
 import { calculateAge } from "../../utils/dateHelpers";
-import { Edit, Trash2, User, Plus, Crown, Check, Square } from 'lucide-react';
+import { Edit, Trash2, User, Plus, Crown, Check } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const columnHelper = createColumnHelper<Member>();
@@ -290,7 +290,7 @@ export const MemberTable: React.FC<MemberTableProps> = ({ onEdit, isBatchMode, o
         return [
             columnHelper.display({
                 id: 'select',
-                header: ({ table }) => (
+                header: () => (
                    <div className="flex items-center justify-center">
                        <span className="text-xs">選取</span>
                    </div>
