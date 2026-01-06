@@ -4,6 +4,7 @@ import type { Member } from '../../types';
 import { User, Skull } from 'lucide-react';
 import { useFamilyStore } from '../../store/useFamilyStore';
 import { calculateRelationship } from '../../utils/kinship';
+import { calculateAge } from '../../utils/dateHelpers';
 
 interface CustomNodeProps {
   data: Member;
@@ -19,11 +20,8 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
   }, [rootMemberId, data.id, members, relationships]);
 
   const age = useMemo(() => {
-     if (!data.dateOfBirth) return '?';
-     const birth = new Date(data.dateOfBirth);
-     const death = data.dateOfDeath ? new Date(data.dateOfDeath) : new Date();
-     const diff = death.getFullYear() - birth.getFullYear();
-     return diff + '歲';
+     const ageStr = calculateAge(data.dateOfBirth, data.dateOfDeath);
+     return ageStr ? ageStr + '歲' : '?';
   }, [data.dateOfBirth, data.dateOfDeath]);
 
   const isDeceased = data.status === '殁' || data.status === 'Deceased' || !!data.dateOfDeath;

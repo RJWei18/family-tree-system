@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { MemberTable } from '../components/members/MemberTable';
 import { MemberForm } from '../components/members/MemberForm';
 import type { Member } from '../types';
-import { Plus, Table2, Check, Download, Upload, Users, Copy } from 'lucide-react';
+import { Plus, Table2, Check, Download, Upload, Users, Copy , Trash2 } from 'lucide-react';
 import { useFamilyStore } from '../store/useFamilyStore';
 import { exportToCSV, parseCSV, parseCSVFromURL, copyCSVToClipboard } from '../utils/csvHelpers';
 import { v4 as uuidv4 } from 'uuid';
@@ -189,6 +189,17 @@ export const MemberEditor: React.FC = () => {
   const addMember = useFamilyStore((state) => state.addMember);
   const addRelationship = useFamilyStore((state) => state.addRelationship);
   const removeRelationship = useFamilyStore((state) => state.removeRelationship);
+  const deleteMember = useFamilyStore((state) => state.deleteMember);
+
+  const handleBatchDelete = () => {
+    if (!window.confirm(`確定要刪除選取的 ${selectedIds.size} 位成員嗎？此動作無法復原。\n\n與這些成員相關的親屬連結也會一併移除。\n\n注意：此操作無法復原！`)) return;
+
+    selectedIds.forEach(id => {
+        deleteMember(id);
+    });
+    setSelectedIds(new Set());
+    alert('批量刪除完成！');
+  };
 
   // Sync selectedIds with members to remove stale IDs
   useEffect(() => {
@@ -425,7 +436,7 @@ export const MemberEditor: React.FC = () => {
                 onClick={() => setIsBatchMode(!isBatchMode)}
                 className={`flex items-center gap-2 px-4 py-3 md:px-5 md:py-3 rounded-xl transition-all font-bold border ${
                     isBatchMode 
-                    ? 'bg-accent/10 border-accent text-accent scale-105 shadow-lg shadow-accent/10' 
+                    ? 'bg-violet-50 border-violet-500 text-violet-700 scale-105 shadow-lg shadow-violet-500/10' 
                     : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
                 }`}
             >
@@ -435,15 +446,26 @@ export const MemberEditor: React.FC = () => {
             
             {/* Batch Actions Toolbar - Only show in batch mode */}
             {isBatchMode ? (
-                 <button
-                    onClick={() => setIsBatchParentsModalOpen(true)}
-                    className="flex items-center gap-2 px-6 py-4 rounded-xl bg-violet-600 text-white font-bold text-lg shadow-lg shadow-violet-600/20 hover:bg-violet-500 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
-                    disabled={selectedIds.size === 0}
-                 >
-                     <Users size={24} />
-                     <span className="hidden sm:inline">設定父母 ({selectedIds.size})</span>
-                     <span className="sm:hidden">設定 ({selectedIds.size})</span>
-                 </button>
+                 <div className="flex gap-2">
+                     <button
+                        onClick={handleBatchDelete}
+                        className="flex items-center gap-2 px-6 py-4 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 font-bold text-lg hover:bg-rose-100 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                        disabled={selectedIds.size === 0}
+                     >
+                         <Trash2 size={24} />
+                         <span className="hidden sm:inline">刪除選取 ({selectedIds.size})</span>
+                         <span className="sm:hidden">刪除 ({selectedIds.size})</span>
+                     </button>
+                     <button
+                        onClick={() => setIsBatchParentsModalOpen(true)}
+                        className="flex items-center gap-2 px-6 py-4 rounded-xl bg-violet-600 text-white font-bold text-lg shadow-lg shadow-violet-600/20 hover:bg-violet-500 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                        disabled={selectedIds.size === 0}
+                     >
+                         <Users size={24} />
+                         <span className="hidden sm:inline">設定父母 ({selectedIds.size})</span>
+                         <span className="sm:hidden">設定 ({selectedIds.size})</span>
+                     </button>
+                 </div>
             ) : (
                 <button
                     onClick={() => setIsFormOpen(true)}

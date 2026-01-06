@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Users, Network, Menu, X } from 'lucide-react';
+import { Users, Network, Menu, X, Calendar } from 'lucide-react';
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  currentView: 'members' | 'tree';
-  onViewChange: (view: 'members' | 'tree') => void;
+  currentView: 'members' | 'tree' | 'calendar';
+  onViewChange: (view: 'members' | 'tree' | 'calendar') => void;
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onViewChange }) => {
@@ -16,7 +16,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
     setMounted(true);
   }, []);
 
-  const handleNavClick = (view: 'members' | 'tree') => {
+  const handleNavClick = (view: 'members' | 'tree' | 'calendar') => {
     onViewChange(view);
     setIsMobileMenuOpen(false);
   };
@@ -93,6 +93,17 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
                     <Network size={24} className="shrink-0" />
                     <span className="truncate">家族樹狀圖</span>
                  </button>
+                 <button
+                    onClick={() => handleNavClick('calendar')}
+                    className={`flex items-center gap-4 p-4 rounded-xl text-lg font-medium transition-all ${
+                    currentView === 'calendar' 
+                        ? 'bg-violet-50 text-violet-700 border border-violet-100' 
+                        : 'hover:bg-slate-50 text-slate-500 hover:text-slate-800'
+                    }`}
+                 >
+                    <Calendar size={24} className="shrink-0" />
+                    <span className="truncate">壽星月曆</span>
+                 </button>
               </nav>
 
               <div className="mt-auto p-6 border-t border-slate-100">
@@ -153,6 +164,17 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
           >
             <Network size={20} />
             家族樹狀圖
+          </button>
+          <button
+            onClick={() => handleNavClick('calendar')}
+            className={`flex items-center gap-3 p-3.5 rounded-xl transition-all font-medium ${
+              currentView === 'calendar' 
+                ? 'bg-gradient-to-r from-violet-50 to-white text-violet-700 shadow-sm border border-violet-100' 
+                : 'hover:bg-white/50 text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <Calendar size={20} />
+            壽星月曆
           </button>
         </nav>
       </aside>

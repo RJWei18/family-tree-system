@@ -1,0 +1,13 @@
+            <button
+                onClick={() => setIsBatchMode(!isBatchMode)}
+                className={`flex items-center gap-2 px-4 py-3 md:px-5 md:py-3 rounded-xl transition-all font-bold border ${
+                    isBatchMode 
+                    ? 'bg-violet-50 border-violet-500 text-violet-700 scale-105 shadow-lg shadow-violet-500/10' 
+                    : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'
+                }`}
+            >
+                {isBatchMode ? <Check size={20} /> : <Table2 size={20} />}
+                {isBatchMode ? '完成批次' : '批次模式'}
+            </button>
+            
+            {/* Batch Actions Toolbar - Only show in batch mode */}

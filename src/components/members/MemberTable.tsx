@@ -9,6 +9,7 @@ import {
 import type { Member } from '../../types';
 import { useFamilyStore } from '../../store/useFamilyStore';
 import { calculateRelationship } from '../../utils/kinship';
+import { calculateAge } from "../../utils/dateHelpers";
 import { Edit, Trash2, User, Plus, Crown, Check, Square } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,22 +23,6 @@ interface MemberTableProps {
   onSelectionChange: (id: string, selected: boolean) => void;
 }
 
-const calculateAge = (dobString?: string, dodString?: string): string => {
-    if (!dobString) return '';
-    const birthDate = new Date(dobString);
-    const endDate = dodString ? new Date(dodString) : new Date();
-    
-    // Check for invalid dates
-    if (isNaN(birthDate.getTime())) return '';
-    if (isNaN(endDate.getTime())) return '';
-
-    let age = endDate.getFullYear() - birthDate.getFullYear();
-    const m = endDate.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && endDate.getDate() < birthDate.getDate())) {
-        age--;
-    }
-    return age < 0 ? '0' : age.toString();
-};
 
 const DeleteConfirmationModal = ({ member, onConfirm, onCancel }: { member: Member, onConfirm: () => void, onCancel: () => void }) => {
     return createPortal(

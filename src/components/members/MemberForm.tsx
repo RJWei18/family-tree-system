@@ -254,24 +254,35 @@ export const MemberForm: React.FC<MemberFormProps> = ({ initialData, onClose }) 
                             <div>
                                 <label className="block text-sm font-medium text-slate-500 mb-2 ml-1">性別</label>
                                 <div className="grid grid-cols-3 gap-3">
-                                    {['male', 'female', 'other'].map((g) => (
-                                        <label key={g} className={`cursor-pointer border-2 rounded-xl p-3 text-center text-base font-medium transition-all active:scale-95 ${formData.gender === g ? 'bg-indigo-50 border-primary text-primary' : 'border-slate-200 text-slate-400 hover:bg-slate-50'}`}>
-                                            <input type="radio" className="hidden" name="gender" value={g} checked={formData.gender === g} onChange={() => setFormData({...formData, gender: g as Gender})} />
-                                            {g === 'male' ? '男性' : g === 'female' ? '女性' : '其他'}
-                                        </label>
-                                    ))}
+                                    <label className={`cursor-pointer border-2 rounded-xl p-3 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 ${formData.gender === "male" ? "bg-blue-50 border-blue-500 text-blue-700 shadow-sm" : "border-slate-200 text-slate-400 hover:bg-slate-50"}`}>
+                                        <input type="radio" className="hidden" name="gender" value="male" checked={formData.gender === "male"} onChange={() => setFormData({...formData, gender: "male"})} />
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${formData.gender === "male" ? "bg-blue-100" : "bg-slate-100"}`}>
+                                            <span className="text-lg font-bold">♂</span>
+                                        </div>
+                                        <span className="font-bold">男性</span>
+                                    </label>
+                                    
+                                    <label className={`cursor-pointer border-2 rounded-xl p-3 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 ${formData.gender === "female" ? "bg-pink-50 border-pink-500 text-pink-700 shadow-sm" : "border-slate-200 text-slate-400 hover:bg-slate-50"}`}>
+                                        <input type="radio" className="hidden" name="gender" value="female" checked={formData.gender === "female"} onChange={() => setFormData({...formData, gender: "female"})} />
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${formData.gender === "female" ? "bg-pink-100" : "bg-slate-100"}`}>
+                                            <span className="text-lg font-bold">♀</span>
+                                        </div>
+                                        <span className="font-bold">女性</span>
+                                    </label>
+
+                                    <label className={`cursor-pointer border-2 rounded-xl p-3 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 ${formData.gender === "other" ? "bg-slate-100 border-slate-500 text-slate-700 shadow-sm" : "border-slate-200 text-slate-400 hover:bg-slate-50"}`}>
+                                        <input type="radio" className="hidden" name="gender" value="other" checked={formData.gender === "other"} onChange={() => setFormData({...formData, gender: "other"})} />
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${formData.gender === "other" ? "bg-slate-200" : "bg-slate-100"}`}>
+                                            <span className="text-lg font-bold">?</span>
+                                        </div>
+                                        <span className="font-bold">其他</span>
+                                    </label>
                                 </div>
                             </div>
                             
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-500 mb-2 ml-1">稱謂/職稱</label>
-                                    <input className="input-field py-2.5 text-slate-800 bg-slate-50 border-slate-200 focus:bg-white" value={formData.title || ''} onChange={e => setFormData({...formData, title: e.target.value})} placeholder="例如: 博士" />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-slate-500 mb-2 ml-1">狀態</label>
-                                    <input className="input-field py-2.5 text-slate-800 bg-slate-50 border-slate-200 focus:bg-white" value={formData.status || ''} onChange={e => setFormData({...formData, status: e.target.value})} placeholder="例如: 在世" />
-                                </div>
+                            <div>
+                                <label className="block text-sm font-medium text-slate-500 mb-2 ml-1">狀態</label>
+                                <input className="input-field py-2.5 text-slate-800 bg-slate-50 border-slate-200 focus:bg-white" value={formData.status || ""} onChange={e => setFormData({...formData, status: e.target.value})} placeholder="例如: 在世, 歿" />
                             </div>
                             
                             <div>
