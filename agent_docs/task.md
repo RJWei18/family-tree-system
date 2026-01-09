@@ -1,12 +1,12 @@
 # Stage 1: Base Data Extension
-- [/] **Database & Types**
+- [x] **Database & Types**
     - [x] Update `Member` interface in `src/types/index.ts` (Added jobTitle, deathReason, notes, isDeceased)
     - [x] Create `src/utils/zodiac.ts` for Zodiac calculation
-- [/] **UI Components**
-    - [/] Update `MemberTable.tsx` (Display Job Title, Zodiac, Age Sorting) <!-- CURRENT FOCUS -->
-    - [ ] Update `CustomNode.tsx` (Tree card enhancements: Job icon, Zodiac, Deceased style)
-    - [ ] Update `MemberForm.tsx` (Input fields for new data) <!-- DELAYED owing to write issues -->
-- [ ] **Verification**
-    - [ ] Verify Member Table columns and sorting
-    - [ ] Verify Tree Node visual updates
-    - [ ] Verify Member Form inputs and submission
+- [x] **UI Components**
+    - [x] Update `MemberTable.tsx` (Display Job Title, Zodiac, Age Sorting)
+    - [x] Update `CustomNode.tsx` (Tree card enhancements: Job icon, Zodiac, Deceased style)
+    - [x] Update `MemberForm.tsx` (Input fields for new data)
+- [x] **Verification**
+    - [x] Verify Member Table columns and sorting
+    - [x] Verify Tree Node visual updates
+    - [x] Verify Member Form inputs and submission
