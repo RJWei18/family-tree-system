@@ -10,6 +10,10 @@ export interface Member {
   photoUrl?: string;
   bio?: string;
   title?: string;
+  jobTitle?: string;
+  deathReason?: string;
+  notes?: string;
+  isDeceased?: boolean;
   status?: string;
   location?: string;
 }

@@ -41,7 +41,7 @@ const CloudImportModal = ({
                style={{
                    position: 'absolute',
                    inset: 0,
-                   backgroundColor: 'rgba(0,0,0,0.5)', // Lighter backdrop
+                   backgroundColor: 'rgba(0,0,0,0.5)',
                    backdropFilter: 'blur(4px)'
                }}
                onClick={onClose}
@@ -162,6 +162,73 @@ const BatchSetParentsModal = ({
     );
 };
 
+const BatchDeleteConfirmationModal = ({ 
+    isOpen, 
+    onClose, 
+    onConfirm, 
+    count 
+}: { 
+    isOpen: boolean, 
+    onClose: () => void, 
+    onConfirm: () => void, 
+    count: number 
+}) => {
+    if (!isOpen) return null;
+
+    return createPortal(
+        <div 
+            style={{
+                position: 'fixed',
+                inset: 0,
+                zIndex: 99999,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '20px',
+                pointerEvents: 'auto'
+            }}
+        >
+            <div 
+               style={{
+                   position: 'absolute',
+                   inset: 0,
+                   backgroundColor: 'rgba(0,0,0,0.5)',
+                   backdropFilter: 'blur(4px)'
+               }}
+               onClick={onClose}
+            />
+            <div className="bg-white border border-slate-200 p-6 rounded-2xl w-full max-w-sm shadow-2xl relative z-10 space-y-4">
+                <div className="flex items-center gap-3 text-rose-500">
+                    <Trash2 size={24} />
+                    <h3 className="text-xl font-bold text-slate-800">確認批量刪除？</h3>
+                </div>
+                <p className="text-slate-600">
+                    您確定要刪除選取的 <span className="font-bold text-slate-900 mx-1">{count}</span> 位成員嗎？
+                </p>
+                <div className="bg-rose-50 p-3 rounded-lg border border-rose-100">
+                     <p className="text-xs text-rose-600 font-bold">此動作無法復原！</p>
+                     <p className="text-xs text-rose-500 mt-1">與這些成員相關的親屬連結也會一併移除。</p>
+                </div>
+                <div className="flex gap-3 justify-end pt-2">
+                    <button 
+                        onClick={onClose}
+                        className="px-4 py-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors font-medium"
+                    >
+                        取消
+                    </button>
+                    <button 
+                        onClick={onConfirm}
+                        className="px-5 py-2 rounded-xl bg-rose-600 text-white font-bold shadow-lg shadow-rose-600/20 hover:bg-rose-500 active:scale-95 transition-all"
+                    >
+                        確認刪除
+                    </button>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+};
+
 export const MemberEditor: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | undefined>();
@@ -170,6 +237,7 @@ export const MemberEditor: React.FC = () => {
   // Selection State
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBatchParentsModalOpen, setIsBatchParentsModalOpen] = useState(false);
+  const [isBatchDeleteModalOpen, setIsBatchDeleteModalOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -191,14 +259,16 @@ export const MemberEditor: React.FC = () => {
   const removeRelationship = useFamilyStore((state) => state.removeRelationship);
   const deleteMember = useFamilyStore((state) => state.deleteMember);
 
-  const handleBatchDelete = () => {
-    if (!window.confirm(`確定要刪除選取的 ${selectedIds.size} 位成員嗎？此動作無法復原。\n\n與這些成員相關的親屬連結也會一併移除。\n\n注意：此操作無法復原！`)) return;
+  const handleBatchDeleteClick = () => {
+      setIsBatchDeleteModalOpen(true);
+  };
 
+  const confirmBatchDelete = () => {
     selectedIds.forEach(id => {
         deleteMember(id);
     });
     setSelectedIds(new Set());
-    alert('批量刪除完成！');
+    setIsBatchDeleteModalOpen(false);
   };
 
   // Sync selectedIds with members to remove stale IDs
@@ -448,7 +518,7 @@ export const MemberEditor: React.FC = () => {
             {isBatchMode ? (
                  <div className="flex gap-2">
                      <button
-                        onClick={handleBatchDelete}
+                        onClick={handleBatchDeleteClick}
                         className="flex items-center gap-2 px-6 py-4 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 font-bold text-lg hover:bg-rose-100 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
                         disabled={selectedIds.size === 0}
                      >
@@ -512,6 +582,13 @@ export const MemberEditor: React.FC = () => {
           onConfirm={handleBatchSetParents}
           members={members}
           selectedCount={selectedIds.size}
+      />
+
+      <BatchDeleteConfirmationModal 
+          isOpen={isBatchDeleteModalOpen}
+          onClose={() => setIsBatchDeleteModalOpen(false)}
+          onConfirm={confirmBatchDelete}
+          count={selectedIds.size}
       />
     </div>
   );

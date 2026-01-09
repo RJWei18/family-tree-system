@@ -1,0 +1,24 @@
+import { compressImage, convertGoogleDriveLink } from '../../utils/imageHelpers';
+import { Camera, Image as ImageIcon, User, Heart, Crown, ChevronLeft } from 'lucide-react';
+// ... imports
+
+// ... inside MemberForm ...
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+        const compressed = await compressImage(file);
+        setFormData({ ...formData, photoUrl: compressed });
+    } catch (err) {
+        console.error('Error compressing image:', err);
+        alert('圖片處理失敗');
+    }
+  };
+
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const val = e.target.value;
+      const converted = convertGoogleDriveLink(val);
+      setFormData({ ...formData, photoUrl: converted });
+  };
