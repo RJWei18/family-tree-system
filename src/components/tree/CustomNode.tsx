@@ -37,8 +37,12 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
   }, [isDeceased, title, data.gender]);
 
   return (
-    <div className={`w-64 p-4 border rounded-xl shadow-lg transition-all duration-300 backdrop-blur-sm ${bgClass}`}>
+    <div className={`w-64 p-4 border rounded-xl shadow-lg transition-all duration-300 backdrop-blur-sm ${bgClass} relative group`}>
       <Handle type="target" position={Position.Top} className="!bg-slate-400 w-3 h-3 border-2 border-white" />
+
+      {/* Side Handles for Spouse Connections */}
+      <Handle type="source" position={Position.Right} id="right" className="!bg-pink-400 w-3 h-3 border-2 border-white !-right-1.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <Handle type="source" position={Position.Left} id="left" className="!bg-blue-400 w-3 h-3 border-2 border-white !-left-1.5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
       <div className="flex items-center gap-4">
         <div className={`w-12 h-12 rounded-full overflow-hidden border-2 shrink-0 flex items-center justify-center ${data.gender === 'male' ? 'border-sky-400 bg-sky-50' : data.gender === 'female' ? 'border-pink-400 bg-pink-50' : 'border-slate-300 bg-slate-50'} ${isDeceased ? 'grayscale opacity-75' : ''}`}>
