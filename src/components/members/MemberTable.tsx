@@ -405,9 +405,9 @@ export const MemberTable: React.FC<MemberTableProps> = ({ onEdit, isBatchMode, o
                         {table.getRowModel().rows.map((row) => {
                             const gender = row.original.gender;
                             // Maximum visibility row coloring
-                            const rowClass = gender === 'male' ? 'bg-blue-200 hover:bg-blue-300' :
-                                gender === 'female' ? 'bg-pink-200 hover:bg-pink-300' :
-                                    'bg-white hover:bg-slate-50';
+                            const rowClass = gender === 'male' ? 'bg-blue-200 hover:bg-blue-300 dark:bg-blue-900/40 dark:hover:bg-blue-900/60' :
+                                gender === 'female' ? 'bg-pink-200 hover:bg-pink-300 dark:bg-pink-900/40 dark:hover:bg-pink-900/60' :
+                                    'bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700';
 
                             return (
                                 <tr key={row.id} className={`${rowClass} transition-colors group relative`}>

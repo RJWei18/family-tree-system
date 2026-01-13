@@ -35,10 +35,10 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
         // Non-blocking container positioned consistently
         <div className="fixed bottom-24 right-6 z-[100] flex flex-col items-end pointer-events-none">
             {/* The Card itself - pointer-events-auto to allow interaction */}
-            <div className="bg-white border-2 border-slate-300 rounded-2xl shadow-xl p-6 w-80 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-200" style={{ backgroundColor: '#ffffff', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)' }}>
+            <div className="bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl shadow-xl p-6 w-80 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-200" style={{ backgroundColor: 'var(--bg-card)', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)' }}>
                 <button
                     onClick={onClose}
-                    className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                 >
                     <X size={20} />
                 </button>
@@ -48,8 +48,8 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
                         <Calculator size={24} />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-800">稱謂計算機</h2>
-                        <p className="text-sm text-slate-500">計算兩位成員之間的親戚關係</p>
+                        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">稱謂計算機</h2>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">計算兩位成員之間的親戚關係</p>
                     </div>
                 </div>
 
@@ -58,7 +58,7 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
                     <div>
                         <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">出發點 (我是...)</label>
                         <select
-                            className="input-field w-full py-2.5 bg-slate-50 border-slate-200"
+                            className="input-field w-full py-2.5 bg-slate-50 border-slate-200 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100"
                             value={personA}
                             onChange={(e) => setPersonA(e.target.value)}
                         >
@@ -74,7 +74,7 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
                     <div className="flex justify-center -my-2">
                         <button
                             onClick={handleSwap}
-                            className="p-1.5 rounded-full bg-slate-100 text-slate-500 hover:bg-violet-50 hover:text-violet-600 transition-colors border border-slate-200 hover:border-violet-200"
+                            className="p-1.5 rounded-full bg-slate-100 text-slate-500 hover:bg-violet-50 hover:text-violet-600 transition-colors border border-slate-200 hover:border-violet-200 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600 dark:hover:bg-slate-600 dark:hover:text-violet-300"
                             title="交換位置"
                         >
                             <ArrowRightLeft size={16} />
@@ -85,7 +85,7 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
                     <div>
                         <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">對象 (他是我的...)</label>
                         <select
-                            className="input-field w-full py-2.5 bg-slate-50 border-slate-200"
+                            className="input-field w-full py-2.5 bg-slate-50 border-slate-200 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100"
                             value={personB}
                             onChange={(e) => setPersonB(e.target.value)}
                         >

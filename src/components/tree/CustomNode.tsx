@@ -15,6 +15,8 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
   const members = useFamilyStore(s => s.members);
   const relationships = useFamilyStore(s => s.relationships);
   const rootMemberId = useFamilyStore(s => s.rootMemberId);
+  const highlightedMemberId = useFamilyStore(s => s.highlightedMemberId);
+  const isHighlighted = highlightedMemberId === data.id;
 
   const title = useMemo(() => {
     return calculateRelationship(rootMemberId, data.id, members, relationships);
@@ -29,15 +31,15 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
   const zodiac = getZodiac(data.dateOfBirth || '');
 
   const bgClass = useMemo(() => {
-    if (isDeceased) return 'border-slate-500 bg-slate-50';
-    if (title === '本人') return 'bg-amber-50 border-amber-200 ring-2 ring-amber-100';
-    if (data.gender === 'male') return 'bg-blue-200 border-blue-300 hover:border-blue-400 hover:shadow-xl';
-    if (data.gender === 'female') return 'bg-pink-200 border-pink-300 hover:border-pink-400 hover:shadow-xl';
-    return 'bg-white/90 border-slate-200 hover:border-violet-200 hover:shadow-xl';
+    if (isDeceased) return 'border-slate-500 bg-slate-50 dark:bg-slate-800 dark:border-slate-600';
+    if (title === '本人') return 'bg-amber-50 border-amber-200 ring-2 ring-amber-100 dark:bg-amber-900/30 dark:border-amber-700/50 dark:ring-amber-900/50';
+    if (data.gender === 'male') return 'bg-blue-200 border-blue-300 hover:border-blue-400 hover:shadow-xl dark:bg-blue-900/30 dark:border-blue-700/50 dark:hover:border-blue-500';
+    if (data.gender === 'female') return 'bg-pink-200 border-pink-300 hover:border-pink-400 hover:shadow-xl dark:bg-pink-900/30 dark:border-pink-700/50 dark:hover:border-pink-500';
+    return 'bg-white/90 border-slate-200 hover:border-violet-200 hover:shadow-xl dark:bg-slate-800/90 dark:border-slate-700 dark:hover:border-violet-500';
   }, [isDeceased, title, data.gender]);
 
   return (
-    <div className={`w-64 p-4 border rounded-xl shadow-lg transition-all duration-300 backdrop-blur-sm ${bgClass} relative group`}>
+    <div className={`w-64 p-4 border rounded-xl shadow-lg transition-all duration-300 backdrop-blur-sm ${bgClass} relative group ${isHighlighted ? 'ring-4 ring-amber-400 scale-105 z-50 shadow-amber-200/50' : ''}`}>
       <Handle type="target" position={Position.Top} className="!bg-slate-400 w-3 h-3 border-2 border-white" />
 
       {/* Side Handles for Spouse Connections */}
@@ -56,7 +58,7 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className={`font-bold text-lg leading-tight truncate ${isDeceased ? 'text-slate-600' : 'text-slate-800'}`}>{data.firstName}</h3>
+            <h3 className={`font-bold text-lg leading-tight truncate ${isDeceased ? 'text-slate-600 dark:text-slate-400' : 'text-slate-800 dark:text-slate-100'}`}>{data.firstName}</h3>
             {title && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-violet-100 text-violet-700 border border-violet-200 shrink-0">{title}</span>}
           </div>
 

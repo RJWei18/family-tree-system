@@ -8,6 +8,10 @@ export const useFamilyStore = create<FamilyTreeState>()(
       members: {},
       relationships: [],
       rootMemberId: null,
+      highlightedMemberId: null,
+      setHighlightedMemberId: (id) => set({ highlightedMemberId: id }),
+      isDarkMode: false,
+      toggleTheme: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
       addMember: (member) => set((state) => ({
         members: { ...state.members, [member.id]: member }
       })),
