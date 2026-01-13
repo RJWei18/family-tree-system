@@ -4,25 +4,34 @@
 
 :root {
   /* Summer Day - Bright & Lively Theme */
-  --bg-main: #f8fafc; /* Slate 50 */
-  --bg-card: #ffffff; /* White */
-  --bg-card-hover: #f1f5f9; /* Slate 100 */
-  
+  --bg-main: #f8fafc;
+  /* Slate 50 */
+  --bg-card: #ffffff;
+  /* White */
+  --bg-card-hover: #f1f5f9;
+  /* Slate 100 */
+
   /* Accents - Modern & Vibrant */
-  --primary: #7c3aed; /* Violet 600 */
-  --primary-hover: #6d28d9; /* Violet 700 */
-  --accent: #0891b2; /* Cyan 600 */
-  
+  --primary: #7c3aed;
+  /* Violet 600 */
+  --primary-hover: #6d28d9;
+  /* Violet 700 */
+  --accent: #0891b2;
+  /* Cyan 600 */
+
   /* Text */
-  --text-main: #0f172a; /* Slate 900 */
-  --text-muted: #64748b; /* Slate 500 */
+  --text-main: #0f172a;
+  /* Slate 900 */
+  --text-muted: #64748b;
+  /* Slate 500 */
   --text-inverse: #ffffff;
-  
+
   /* Borders & Glass */
-  --border-color: #e2e8f0; /* Slate 200 */
+  --border-color: #e2e8f0;
+  /* Slate 200 */
   --glass-border: 1px solid rgba(255, 255, 255, 0.5);
   --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-  
+
   /* Typography - Chinese Support */
   font-family: 'Inter', 'Noto Sans TC', 'Microsoft JhengHei', system-ui, sans-serif;
   line-height: 1.6;
@@ -35,12 +44,14 @@
 }
 
 /* FIX: data visualization apps need explicit height inheritance */
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden; /* Prevent body scroll */
+  overflow: hidden;
+  /* Prevent body scroll */
 }
 
 #root {
@@ -60,10 +71,10 @@ html, body {
 }
 
 .heading-gradient {
-   background: linear-gradient(135deg, #7c3aed 0%, #0891b2 100%);
-   -webkit-background-clip: text;
-   background-clip: text;
-   color: transparent;
+  background: linear-gradient(135deg, #7c3aed 0%, #0891b2 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* Updated Button Styles */
@@ -71,7 +82,8 @@ html, body {
   background: linear-gradient(135deg, var(--primary) 0%, #6d28d9 100%);
   color: white;
   border: none;
-  padding: 0.75em 1.5em; /* Larger touch target */
+  padding: 0.75em 1.5em;
+  /* Larger touch target */
   border-radius: 12px;
   cursor: pointer;
   font-weight: 600;
@@ -100,7 +112,7 @@ html, body {
   box-sizing: border-box;
   font-size: 0.95rem;
   transition: all 0.2s;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .input-field:focus {
@@ -112,8 +124,8 @@ html, body {
 
 /* Custom Scrollbar - Light Theme */
 *::-webkit-scrollbar {
-  width: 12px;
-  height: 12px; 
+  width: 8px;
+  height: 8px;
 }
 
 *::-webkit-scrollbar-track {
@@ -122,13 +134,15 @@ html, body {
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1; /* Slate 300 */
+  background-color: #cbd5e1;
+  /* Slate 300 */
   border-radius: 6px;
   border: 3px solid #f1f5f9;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8; /* Slate 400 */
+  background-color: #94a3b8;
+  /* Slate 400 */
 }
 
 /* FORCE SCROLLBAR VISIBILITY ON ALL BROWSERS */
@@ -136,4 +150,50 @@ html, body {
 * {
   scrollbar-width: thin !important;
   scrollbar-color: #cbd5e1 #f1f5f9 !important;
+}
+
+/* --- Family Tree UI/UX Specs --- */
+.family-node-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.1));
+  width: 120px;
+  /* Fixed width as requested */
+}
+
+.avatar-wrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid #ffffff;
+  overflow: hidden;
+  background: #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.node-deceased .avatar-wrapper {
+  filter: grayscale(100%) opacity(0.8);
+  border: 4px dashed #bdc3c7;
+}
+
+.name-ribbon {
+  margin-top: -12px;
+  /* Pull up to overlap avatar */
+  background: #FAD089;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  color: #5D4037;
+  font-size: 14px;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  min-width: 60px;
 }

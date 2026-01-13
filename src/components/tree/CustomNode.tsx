@@ -24,71 +24,64 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
 
   const age = useMemo(() => {
     const ageStr = calculateAge(data.dateOfBirth, data.dateOfDeath);
-    return ageStr ? ageStr + '歲' : '?';
+    return ageStr ? ageStr + '歲' : '';
   }, [data.dateOfBirth, data.dateOfDeath]);
 
   const isDeceased = data.status === '殁' || data.status === 'Deceased' || !!data.dateOfDeath;
   const zodiac = getZodiac(data.dateOfBirth || '');
 
-  const bgClass = useMemo(() => {
-    if (isDeceased) return 'border-slate-500 bg-slate-50 dark:bg-slate-800 dark:border-slate-600';
-    if (title === '本人') return 'bg-amber-50 border-amber-200 ring-2 ring-amber-100 dark:bg-amber-900/30 dark:border-amber-700/50 dark:ring-amber-900/50';
-    if (data.gender === 'male') return 'bg-blue-200 border-blue-300 hover:border-blue-400 hover:shadow-xl dark:bg-blue-900/30 dark:border-blue-700/50 dark:hover:border-blue-500';
-    if (data.gender === 'female') return 'bg-pink-200 border-pink-300 hover:border-pink-400 hover:shadow-xl dark:bg-pink-900/30 dark:border-pink-700/50 dark:hover:border-pink-500';
-    return 'bg-white/90 border-slate-200 hover:border-violet-200 hover:shadow-xl dark:bg-slate-800/90 dark:border-slate-700 dark:hover:border-violet-500';
-  }, [isDeceased, title, data.gender]);
+  // bgClass replaced by fixed CSS classes .family-node-container and .avatar-wrapper
 
   return (
-    <div className={`w-64 p-4 border rounded-xl shadow-lg transition-all duration-300 backdrop-blur-sm ${bgClass} relative group ${isHighlighted ? 'ring-4 ring-amber-400 scale-105 z-50 shadow-amber-200/50' : ''}`}>
-      <Handle type="target" position={Position.Top} className="!bg-slate-400 w-3 h-3 border-2 border-white" />
+    <div className={`family-node-container ${isDeceased ? 'node-deceased' : ''} group relative`}>
+      {/* Handles - Essential for Edges to connect */}
+      {/* Top/Bottom for Parent-Child */}
+      <Handle type="target" position={Position.Top} className="!w-1 !h-1 !bg-transparent !border-none" />
+      <Handle type="source" position={Position.Bottom} className="!w-1 !h-1 !bg-transparent !border-none" />
 
-      {/* Side Handles for Spouse Connections */}
-      <Handle type="source" position={Position.Right} id="right" className="!bg-pink-400 w-3 h-3 border-2 border-white !-right-1.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-      <Handle type="source" position={Position.Left} id="left" className="!bg-blue-400 w-3 h-3 border-2 border-white !-left-1.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+      {/* Left/Right for Spouse Connections (Restored) */}
+      <Handle type="source" position={Position.Left} id="left" className="!w-1 !h-1 !bg-transparent !border-none !top-1/2" />
+      <Handle type="source" position={Position.Right} id="right" className="!w-1 !h-1 !bg-transparent !border-none !top-1/2" />
 
-      <div className="flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-full overflow-hidden border-2 shrink-0 flex items-center justify-center ${data.gender === 'male' ? 'border-sky-400 bg-sky-50' : data.gender === 'female' ? 'border-pink-400 bg-pink-50' : 'border-slate-300 bg-slate-50'} ${isDeceased ? 'grayscale opacity-75' : ''}`}>
-          {data.photoUrl ? (
-            <img src={data.photoUrl} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <div className={`w-full h-full flex items-center justify-center ${data.gender === 'male' ? 'text-sky-400' : data.gender === 'female' ? 'text-pink-400' : 'text-slate-400'}`}>
-              <User size={24} />
-            </div>
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className={`font-bold text-lg leading-tight truncate ${isDeceased ? 'text-slate-600 dark:text-slate-400' : 'text-slate-800 dark:text-slate-100'}`}>{data.firstName}</h3>
-            {title && <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-violet-100 text-violet-700 border border-violet-200 shrink-0">{title}</span>}
+      {/* Center Handle for complex routing if needed */}
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="center"
+        style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 0, height: 0, opacity: 0, border: 0 }}
+      />
+
+      {/* Highlight Ring */}
+      {isHighlighted && (
+        <div className="absolute inset-0 rounded-full ring-4 ring-amber-400 z-50 scale-110 pointer-events-none" style={{ borderRadius: '50%' }} />
+      )}
+
+      {/* Avatar Section */}
+      <div className="avatar-wrapper shadow-sm">
+        {data.photoUrl ? (
+          <img src={data.photoUrl} alt={data.firstName} className="w-full h-full object-cover" />
+        ) : (
+          <div className={`w-full h-full flex items-center justify-center ${data.gender === 'male' ? 'bg-[#E3F2FD] text-[#2196F3]' : data.gender === 'female' ? 'bg-[#FCE4EC] text-[#E91E63]' : 'bg-slate-100 text-slate-400'}`}>
+            <User size={32} strokeWidth={2.5} />
           </div>
-
-          {data.jobTitle && (
-            <div className="flex items-center gap-1 text-slate-500 text-xs mt-0.5">
-              <Briefcase size={10} />
-              <span className="truncate">{data.jobTitle}</span>
-            </div>
-          )}
-
-          <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
-            <span className="text-sm flex items-center gap-0.5" title="生肖">
-              <span>{zodiac}</span>
-              <span className="text-[10px] text-slate-400">{getZodiacName(data.dateOfBirth || '')}</span>
-            </span>
-            <span className="text-slate-300">•</span>
-            <span>{age}</span>
-            {isDeceased && (
-              <>
-                <span className="text-slate-300">•</span>
-                <span className="flex items-center gap-1 text-slate-500 bg-slate-200 px-1 rounded border border-slate-300">
-                  <Skull size={10} />
-                </span>
-              </>
-            )}
-          </div>
-        </div>
+        )}
       </div>
 
-      <Handle type="source" position={Position.Bottom} className="!bg-slate-400 w-3 h-3 border-2 border-white" />
+      {/* Name Ribbon */}
+      <div className="name-ribbon flex flex-col items-center">
+        <span className="text-sm font-bold leading-none">{data.firstName}</span>
+        <span className="text-[10px] opacity-80 mt-0.5 font-normal flex items-center gap-1">
+          <span>{age}</span>
+          {zodiac && <span>{zodiac}</span>}
+        </span>
+      </div>
+
+      {/* Detailed Tooltip on Hover (Optional, or simple details) */}
+      <div className="absolute top-full mt-2 bg-white/90 backdrop-blur text-slate-700 text-xs p-2 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 whitespace-nowrap border border-slate-100">
+        <div>{getZodiac(data.dateOfBirth || '')} {getZodiacName(data.dateOfBirth || '')}</div>
+        {data.jobTitle && <div>{data.jobTitle}</div>}
+        {isDeceased && <div className="text-slate-500">已故</div>}
+      </div>
     </div>
   );
 });
