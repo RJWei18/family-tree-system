@@ -1,0 +1,5 @@
+
+> family-tree-system@0.0.0 build
+> tsc && vite build
+
+src/components/tree/VirtualNode.tsx(1,8): error TS6133: 'React' is declared but its value is never read.

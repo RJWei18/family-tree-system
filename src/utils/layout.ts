@@ -144,7 +144,7 @@ export const buildGraph = (
   return { nodes, edges };
 };
 
-export const getLayoutedElements = (nodes: any[], edges: any[]) => {
+export const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
 
