@@ -13,8 +13,7 @@ function downloadImage(dataUrl: string) {
     document.body.removeChild(a);
 }
 
-const imageWidth = 1024;
-const imageHeight = 768;
+
 
 export const ExportButton: React.FC = () => {
     const { getNodes } = useReactFlow();
@@ -22,8 +21,6 @@ export const ExportButton: React.FC = () => {
 
     const onClick = () => {
         setIsDownloading(true);
-        // We try to find the .react-flow__viewport element
-        // This assumes the standard class name layout of React Flow
         const viewport = document.querySelector('.react-flow__viewport') as HTMLElement;
 
         if (!viewport) {
@@ -32,18 +29,26 @@ export const ExportButton: React.FC = () => {
             return;
         }
 
-        // Calculate the bounds of all nodes to export the full tree
         const nodes = getNodes();
+        if (nodes.length === 0) {
+            setIsDownloading(false);
+            return;
+        }
+
         const nodesBounds = getRectOfNodes(nodes);
-        const transform = getTransformForBounds(nodesBounds, imageWidth, imageHeight, 0.5, 2);
+        const padding = 50;
+        const width = nodesBounds.width + padding * 2;
+        const height = nodesBounds.height + padding * 2;
+
+        const transform = getTransformForBounds(nodesBounds, width, height, 0.5, 2);
 
         toPng(viewport, {
-            backgroundColor: '#f8fafc', // slate-50
-            width: imageWidth,
-            height: imageHeight,
+            backgroundColor: '#ffffff', // Use plain white for better export
+            width: width,
+            height: height,
             style: {
-                width: String(imageWidth),
-                height: String(imageHeight),
+                width: String(width),
+                height: String(height),
                 transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
             },
         }).then(downloadImage)

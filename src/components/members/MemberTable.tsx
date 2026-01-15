@@ -15,7 +15,7 @@ import { calculateAge } from "../../utils/dateHelpers";
 import { getZodiac, getZodiacName } from "../../utils/zodiac";
 import { Edit, Trash2, User, Plus, Crown, Check, Briefcase, ArrowUp, ArrowDown } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { FamilyAvatar } from '../common/FamilyAvatar';
+
 
 const columnHelper = createColumnHelper<Member>();
 
@@ -372,75 +372,7 @@ export const MemberTable: React.FC<MemberTableProps> = ({ onEdit, isBatchMode, o
         getSortedRowModel: getSortedRowModel(),
     });
 
-    // Card Component for Grid View
-    const MemberCard = ({ row }: { row: any }) => {
-        const member = row.original;
-        const isDeceased = !!member.dateOfDeath || member.status === 'Deceased' || member.status === '歿';
-        const age = calculateAge(member.dateOfBirth, member.dateOfDeath);
 
-        return (
-            <div className={`
-                relative flex flex-col items-center p-6 rounded-2xl transition-all duration-300
-                bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700
-                hover:shadow-xl hover:-translate-y-1 group
-                ${isDeceased ? 'opacity-90 grayscale-[0.3]' : ''}
-            `}>
-                {/* Avatar with Status */}
-                <div className="mb-4 relative">
-                    <FamilyAvatar
-                        src={member.photoUrl}
-                        gender={member.gender}
-                        isDeceased={isDeceased}
-                        size="lg"
-                    />
-                    {member.gender === 'male' && <div className="absolute bottom-0 right-0 bg-blue-100 text-blue-600 p-1 rounded-full text-xs border border-white"><User size={12} /></div>}
-                    {member.gender === 'female' && <div className="absolute bottom-0 right-0 bg-pink-100 text-pink-600 p-1 rounded-full text-xs border border-white"><User size={12} /></div>}
-                </div>
-
-                {/* Name & Title */}
-                <h3 className="text-lg font-bold text-[var(--text-main)] mb-1">
-                    {member.lastName}{member.firstName}
-                </h3>
-                <div className="h-6 mb-2">
-                    <KinshipCell memberId={member.id} />
-                </div>
-
-                {/* Info Badges */}
-                <div className="flex flex-wrap justify-center gap-2 mb-4 text-xs text-slate-500">
-                    <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-md">
-                        {age ? `${age}歲` : '未知年齡'}
-                    </span>
-                    {member.jobTitle && (
-                        <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-md">
-                            <Briefcase size={12} />
-                            {member.jobTitle}
-                        </span>
-                    )}
-                    {isDeceased && (
-                        <span className="bg-slate-100 text-slate-500 border border-slate-200 px-2 py-1 rounded-md">
-                            已故
-                        </span>
-                    )}
-                </div>
-
-                {/* Actions (Hover reveal or always visible on touch) */}
-                <div className="flex gap-2 w-full mt-auto pt-4 border-t border-slate-50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                    <button
-                        onClick={() => onEdit(member)}
-                        className="flex-1 py-2 rounded-lg bg-[var(--bg-main)] text-[var(--text-main)] hover:bg-[var(--accent)] hover:text-white transition-colors text-sm font-medium flex items-center justify-center gap-2"
-                    >
-                        <Edit size={16} /> 編輯
-                    </button>
-                    <button
-                        onClick={() => setDeleteTarget(member)}
-                        className="p-2 rounded-lg text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                    >
-                        <Trash2 size={16} />
-                    </button>
-                </div>
-            </div>
-        );
-    };
 
     return (
         <>

@@ -34,7 +34,7 @@ export const FamilyGraph: React.FC = () => {
     }, [onLayout]);
 
     return (
-        <div style={{ width: '100vw', height: '100vh' }} className="relative bg-[#F9F4E8] dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
+        <div className="w-full h-full relative bg-[#F9F4E8] dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
             {/* Background Image with Opacity */}
             <div
                 className="absolute inset-0 z-0 pointer-events-none"
