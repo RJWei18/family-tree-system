@@ -29,6 +29,18 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
     }
   }, [isDarkMode]);
 
+  // Lock viewport height for Tree view to prevent window scroll interference with React Flow
+  useEffect(() => {
+    if (currentView === 'tree') {
+      document.body.classList.add('app-fixed-height');
+    } else {
+      document.body.classList.remove('app-fixed-height');
+    }
+    return () => {
+      document.body.classList.remove('app-fixed-height');
+    };
+  }, [currentView]);
+
   const handleNavClick = (view: 'members' | 'tree' | 'calendar') => {
     onViewChange(view);
     setIsMobileMenuOpen(false);

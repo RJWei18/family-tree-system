@@ -1,57 +1,27 @@
 /**
- * Compresses an image file to a smaller size and returns a Base64 string.
- * Max width: 300px
- * Quality: 0.7
+ * Transforms various image URLs into direct displayable URLs.
+ * Specifically handles Google Drive sharing links.
  */
-export const compressImage = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target?.result as string;
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 300;
-                let width = img.width;
-                let height = img.height;
+export const getOptimizedImageUrl = (url?: string): string | undefined => {
+    if (!url) return undefined;
 
-                if (width > MAX_WIDTH) {
-                    height *= MAX_WIDTH / width;
-                    width = MAX_WIDTH;
-                }
+    // Handle Google Drive URLs
+    // Format 1: https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+    // Format 2: https://drive.google.com/open?id=FILE_ID
 
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx?.drawImage(img, 0, 0, width, height);
-                
-                // Compress to JPEG with 0.7 quality
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                resolve(dataUrl);
-            };
-            img.onerror = (err) => reject(err);
-        };
-        reader.onerror = (err) => reject(err);
-    });
-};
+    // Regex to extract the ID
+    // Matches file/d/ID or id=ID
+    const driveRegex = /(?:file\/d\/|id=)([a-zA-Z0-9_-]+)/;
+    const match = url.match(driveRegex);
 
-/**
- * Converts a Google Drive sharing URL to a direct image link.
- * Supports standard sharing links: https://drive.google.com/file/d/Vk.../view\?usp\=sharing
- */
-export const convertGoogleDriveLink = (url: string): string => {
-    try {
-        // Regex to extract File ID
-        // Matches /file/d/FILE_ID/ or id=FILE_ID
-        const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)\/|id=([a-zA-Z0-9_-]+)/);
-        const fileId = match ? (match[1] || match[2]) : null;
-
+    if (match && (url.includes('drive.google.com') || url.includes('docs.google.com'))) {
+        const fileId = match[1];
         if (fileId) {
-            return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`; // Use thumbnail API for reliability
+            // Use the thumbnail endpoint which is more reliable for embedding than "uc?export=view"
+            // sz=w500 requests a width of 500px (good for avatars)
+            return `https://drive.google.com/thumbnail?id=${fileId}&sz=w500`;
         }
-    } catch (e) {
-        console.warn('Invalid Google Drive URL', e);
     }
+
     return url;
 };

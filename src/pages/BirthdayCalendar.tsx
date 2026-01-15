@@ -74,7 +74,7 @@ export const BirthdayCalendar: React.FC = () => {
                             <p className="text-slate-400 text-sm text-center py-8">本月沒有壽星</p>
                         ) : (
                             monthlyBirthdays.map(({ member, day, age }) => (
-                                <div key={member.id} className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-100 shadow-sm shrink-0">
+                                <div key={member.id} className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-100 shadow-sm shrink-0">
                                     {/* Fixed Width Date Column */}
                                     <div className="w-[36px] shrink-0 text-center">
                                         <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0.5">DATE</div>
@@ -84,13 +84,21 @@ export const BirthdayCalendar: React.FC = () => {
                                     </div>
 
                                     {/* Divider */}
-                                    <div className="w-px h-8 bg-slate-100 shrink-0" />
+                                    <div className="w-px h-10 bg-slate-100 shrink-0" />
 
                                     {/* Avatar & Info */}
-                                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                                        <FamilyAvatar src={member.photoUrl} gender={member.gender} size="sm" isDeceased={!!member.dateOfDeath} />
-                                        <div className="min-w-0 flex-1">
-                                            <div className="font-bold text-sm text-[var(--text-main)] truncate">
+                                    <div className="flex items-center gap-0 min-w-0 flex-1 relative">
+                                        <div style={{ width: '48px', height: '48px', minWidth: '48px' }}>
+                                            <FamilyAvatar
+                                                src={member.photoUrl}
+                                                gender={member.gender}
+                                                size="md"
+                                                isDeceased={!!member.dateOfDeath}
+                                                className="w-full h-full"
+                                            />
+                                        </div>
+                                        <div className="min-w-0 flex-1 ml-[40px]">
+                                            <div className="font-bold text-sm text-[var(--text-main)] truncate mb-0.5">
                                                 {member.lastName}{member.firstName}
                                             </div>
                                             <div className="text-xs text-[var(--text-muted)] truncate">
@@ -163,22 +171,22 @@ export const BirthdayCalendar: React.FC = () => {
                                             const isDeceased = !!m.dateOfDeath;
                                             return (
                                                 <div key={m.id} className={`
-                                                    flex items-center gap-1.5 p-1 rounded-md mb-1 transition-all
+                                                    flex items-center gap-0 p-1 rounded-md mb-1 transition-all relative
                                                     ${isDeceased ? 'bg-slate-100/50' : 'bg-pink-50/50 hover:bg-pink-100'}
                                                 `}>
                                                     {/* Tiny Avatar (24px approx) */}
-                                                    <div className="w-6 h-6 shrink-0">
+                                                    <div className="w-6 h-6 shrink-0 relative" style={{ width: '24px', height: '24px', minWidth: '24px' }}>
                                                         <FamilyAvatar
                                                             src={m.photoUrl}
                                                             gender={m.gender}
                                                             size="sm"
                                                             isDeceased={isDeceased}
-                                                            className="!w-6 !h-6 !border-[1px]"
+                                                            className="!w-full !h-full !border-[1px]"
                                                         />
                                                     </div>
 
                                                     {/* Name Truncated */}
-                                                    <div className="min-w-0 flex-1 text-[10px] font-medium truncate text-slate-700">
+                                                    <div className="min-w-0 flex-1 ml-[28px] text-[10px] font-medium truncate text-slate-700">
                                                         {m.lastName}{m.firstName}
                                                     </div>
                                                 </div>

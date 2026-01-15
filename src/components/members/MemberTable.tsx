@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { getOptimizedImageUrl } from '../../utils/imageHelpers';
 import { createPortal } from 'react-dom';
 import {
     createColumnHelper,
@@ -149,14 +150,54 @@ export const MemberTable: React.FC<MemberTableProps> = ({ onEdit, isBatchMode, o
 
     const columns = useMemo(() => {
         const cols = [
+
+
             columnHelper.accessor('photoUrl', {
                 header: '頭像',
-                cell: (info) => (
-                    <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden border border-slate-200 shadow-sm flex items-center justify-center pointer-events-none">
-                        {info.getValue() ? <img src={info.getValue()} className="w-full h-full object-cover" /> : <User size={20} className="text-slate-400" />}
-                    </div>
-                ),
-                size: 60,
+                cell: (info) => {
+                    const src = info.getValue();
+                    const displaySrc = getOptimizedImageUrl(src);
+
+                    return (
+                        <div className="relative group flex items-center justify-center">
+                            {/* Main Avatar (48px = 3rem = w-12/h-12) */}
+                            <div
+                                className="w-12 h-12 rounded-full bg-slate-100 overflow-hidden border border-slate-200 shadow-sm flex items-center justify-center pointer-events-none transition-transform group-hover:scale-105"
+                                style={{ width: '48px', height: '48px', minWidth: '48px' }} // Force size
+                            >
+                                {displaySrc ? (
+                                    <img
+                                        src={displaySrc}
+                                        className="w-full h-full object-cover"
+                                        referrerPolicy="no-referrer"
+                                        alt="Avatar"
+                                    />
+                                ) : (
+                                    <User size={24} className="text-slate-400" />
+                                )}
+                            </div>
+
+                            {/* Hover Preview (Large) */}
+                            {displaySrc && (
+                                <div className="absolute left-14 top-1/2 -translate-y-1/2 z-50 hidden group-hover:block animate-in fade-in slide-in-from-left-2 duration-200">
+                                    <div className="w-32 h-32 rounded-xl bg-white shadow-2xl border-[3px] border-white ring-1 ring-slate-100 overflow-hidden relative">
+                                        <img
+                                            src={displaySrc}
+                                            className="w-full h-full object-cover"
+                                            referrerPolicy="no-referrer"
+                                            alt="Preview"
+                                        />
+                                        {/* Helper Text */}
+                                        <div className="absolute bottom-0 inset-x-0 bg-black/40 text-white text-[10px] py-1 text-center backdrop-blur-sm">
+                                            {info.row.original.lastName}{info.row.original.firstName}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                },
+                size: 80, // Increased size to accommodate 48px + padding
             }),
             columnHelper.accessor((row) => `${row.lastName || ''}${row.firstName}`, {
                 id: 'fullName',

@@ -1,5 +1,6 @@
 import React from 'react';
 import { User } from 'lucide-react';
+import { getOptimizedImageUrl } from '../../utils/imageHelpers';
 
 interface FamilyAvatarProps {
     src?: string;
@@ -30,6 +31,8 @@ export const FamilyAvatar: React.FC<FamilyAvatarProps> = ({
     size = 'lg',
     className = ''
 }) => {
+    const displaySrc = getOptimizedImageUrl(src);
+
     const containerBase = `
         rounded-full 
         overflow-hidden 
@@ -48,8 +51,18 @@ export const FamilyAvatar: React.FC<FamilyAvatarProps> = ({
 
     return (
         <div className={`family-avatar-component ${containerBase} ${borderColor} ${filterClass} shadow-sm ${className}`}>
-            {src ? (
-                <img src={src} alt="Avatar" className="w-full h-full object-cover" />
+            {displaySrc ? (
+                <img
+                    src={displaySrc}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                        // Fallback if image fails (e.g. 403 or 404)
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.parentElement?.classList.add('fallback-icon-project');
+                    }}
+                />
             ) : (
                 <div className={`w-full h-full flex items-center justify-center ${gender === 'male' ? 'bg-[#E3F2FD] text-[#2196F3]' :
                     gender === 'female' ? 'bg-[#FCE4EC] text-[#E91E63]' :
