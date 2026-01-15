@@ -15,6 +15,7 @@ import { calculateAge } from "../../utils/dateHelpers";
 import { getZodiac, getZodiacName } from "../../utils/zodiac";
 import { Edit, Trash2, User, Plus, Crown, Check, Briefcase, ArrowUp, ArrowDown } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import { FamilyAvatar } from '../common/FamilyAvatar';
 
 const columnHelper = createColumnHelper<Member>();
 
@@ -371,66 +372,124 @@ export const MemberTable: React.FC<MemberTableProps> = ({ onEdit, isBatchMode, o
         getSortedRowModel: getSortedRowModel(),
     });
 
+    // Card Component for Grid View
+    const MemberCard = ({ row }: { row: any }) => {
+        const member = row.original;
+        const isDeceased = !!member.dateOfDeath || member.status === 'Deceased' || member.status === '歿';
+        const age = calculateAge(member.dateOfBirth, member.dateOfDeath);
+
+        return (
+            <div className={`
+                relative flex flex-col items-center p-6 rounded-2xl transition-all duration-300
+                bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700
+                hover:shadow-xl hover:-translate-y-1 group
+                ${isDeceased ? 'opacity-90 grayscale-[0.3]' : ''}
+            `}>
+                {/* Avatar with Status */}
+                <div className="mb-4 relative">
+                    <FamilyAvatar
+                        src={member.photoUrl}
+                        gender={member.gender}
+                        isDeceased={isDeceased}
+                        size="lg"
+                    />
+                    {member.gender === 'male' && <div className="absolute bottom-0 right-0 bg-blue-100 text-blue-600 p-1 rounded-full text-xs border border-white"><User size={12} /></div>}
+                    {member.gender === 'female' && <div className="absolute bottom-0 right-0 bg-pink-100 text-pink-600 p-1 rounded-full text-xs border border-white"><User size={12} /></div>}
+                </div>
+
+                {/* Name & Title */}
+                <h3 className="text-lg font-bold text-[var(--text-main)] mb-1">
+                    {member.lastName}{member.firstName}
+                </h3>
+                <div className="h-6 mb-2">
+                    <KinshipCell memberId={member.id} />
+                </div>
+
+                {/* Info Badges */}
+                <div className="flex flex-wrap justify-center gap-2 mb-4 text-xs text-slate-500">
+                    <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-md">
+                        {age ? `${age}歲` : '未知年齡'}
+                    </span>
+                    {member.jobTitle && (
+                        <span className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-md">
+                            <Briefcase size={12} />
+                            {member.jobTitle}
+                        </span>
+                    )}
+                    {isDeceased && (
+                        <span className="bg-slate-100 text-slate-500 border border-slate-200 px-2 py-1 rounded-md">
+                            已故
+                        </span>
+                    )}
+                </div>
+
+                {/* Actions (Hover reveal or always visible on touch) */}
+                <div className="flex gap-2 w-full mt-auto pt-4 border-t border-slate-50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                    <button
+                        onClick={() => onEdit(member)}
+                        className="flex-1 py-2 rounded-lg bg-[var(--bg-main)] text-[var(--text-main)] hover:bg-[var(--accent)] hover:text-white transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                    >
+                        <Edit size={16} /> 編輯
+                    </button>
+                    <button
+                        onClick={() => setDeleteTarget(member)}
+                        className="p-2 rounded-lg text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                    >
+                        <Trash2 size={16} />
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <>
-            <div className="w-full overflow-auto h-full pr-0 md:pr-2 flex flex-col bg-transparent">
-                <table className="w-full border-collapse text-left min-w-[600px] md:min-w-0">
-                    <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-sm z-20 shadow-sm border-b border-slate-200">
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <th
-                                        key={header.id}
-                                        className="p-3 md:p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 whitespace-nowrap cursor-pointer select-none hover:bg-slate-100 transition-colors"
-                                        onClick={header.column.getToggleSortingHandler()}
-                                    >
-                                        <div className="flex items-center gap-2">
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                            {{
-                                                asc: <ArrowUp size={14} />,
-                                                desc: <ArrowDown size={14} />,
-                                            }[header.column.getIsSorted() as string] ?? null}
-                                        </div>
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {table.getRowModel().rows.map((row) => {
-                            const gender = row.original.gender;
-                            // Maximum visibility row coloring
-                            const rowClass = gender === 'male' ? 'bg-blue-200 hover:bg-blue-300 dark:bg-blue-900/40 dark:hover:bg-blue-900/60' :
-                                gender === 'female' ? 'bg-pink-200 hover:bg-pink-300 dark:bg-pink-900/40 dark:hover:bg-pink-900/60' :
-                                    'bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700';
-
-                            return (
-                                <tr key={row.id} className={`${rowClass} transition-colors group relative`}>
+            <div className="w-full h-full pr-0 md:pr-2 flex flex-col bg-transparent">
+                {/* ALWAYS TABLE VIEW AS PER FEEDBACK */}
+                <div className="overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm h-full flex flex-col">
+                    <table className="w-full border-collapse text-left min-w-[600px] md:min-w-0">
+                        <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-sm z-20 shadow-sm border-b border-slate-200">
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th
+                                            key={header.id}
+                                            className="p-3 md:p-4 text-xs font-semibold uppercase tracking-wider text-slate-500 whitespace-nowrap cursor-pointer select-none hover:bg-slate-100 transition-colors"
+                                            onClick={header.column.getToggleSortingHandler()}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                        header.column.columnDef.header,
+                                                        header.getContext()
+                                                    )}
+                                                {{
+                                                    asc: <ArrowUp size={14} />,
+                                                    desc: <ArrowDown size={14} />,
+                                                }[header.column.getIsSorted() as string] ?? null}
+                                            </div>
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {table.getRowModel().rows.map((row) => (
+                                <tr key={row.id} className="bg-white hover:bg-slate-50 transition-colors">
                                     {row.getVisibleCells().map((cell) => (
                                         <td key={cell.id} className="p-3 md:p-4 align-middle">
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </td>
                                     ))}
                                 </tr>
-                            );
-                        })}
-                        {members.length === 0 && (
-                            <tr>
-                                <td colSpan={7} className="p-12 text-center text-slate-400">
-                                    <p>目前沒有家族成員</p>
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
 
                 {isBatchMode && (
-                    <div className="p-4 border-t border-slate-200 sticky bottom-0 bg-white/90 backdrop-blur z-30 safe-area-pb">
+                    <div className="p-4 border-t border-slate-200 sticky bottom-0 bg-white/90 backdrop-blur z-30 safe-area-pb mt-auto">
                         <button
                             onClick={handleAddRow}
                             className="w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all flex items-center justify-center gap-2 font-medium"

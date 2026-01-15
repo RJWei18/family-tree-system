@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
-import ReactFlow, { Background, Controls, MiniMap, Panel, useNodesState, useEdgesState } from 'reactflow';
+import ReactFlow, { Controls, MiniMap, Panel, useNodesState, useEdgesState } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useFamilyStore } from '../../store/useFamilyStore';
 import { CustomNode } from './CustomNode';
@@ -20,10 +20,10 @@ export const FamilyGraph: React.FC = () => {
     }), []);
 
     const onLayout = useCallback(() => {
-        const { nodes: initialNodes, edges: initialEdges } = buildGraph(members, relationships);
+        const { nodes: builtNodes, edges: builtEdges } = buildGraph(members, relationships);
         const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-            initialNodes,
-            initialEdges
+            builtNodes,
+            builtEdges
         );
         setNodes([...layoutedNodes]);
         setEdges([...layoutedEdges]);
@@ -63,9 +63,6 @@ export const FamilyGraph: React.FC = () => {
                     type: 'smoothstep',
                     animated: false,
                     style: { stroke: '#8D6E63', strokeWidth: 2 },
-                    // startMarker: undefined,
-                    // endMarker: undefined, // No search arrows
-                    pathOptions: { borderRadius: 20 }
                 }}
             >
                 <Controls className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-600 dark:text-slate-400 fill-slate-600 dark:fill-slate-400" />

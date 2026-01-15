@@ -48,17 +48,19 @@ html,
 body {
   margin: 0;
   padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  /* Prevent body scroll */
+  margin: 0;
+  padding: 0;
+  /* width: 100%;  <-- Removed to let it flow naturally */
+  /* height: 100%; <-- Removed to fix scroll bounce */
+  overflow-x: hidden;
+  /* Prevent horizontal scroll */
 }
 
 #root {
-  width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+  /* Ensure it takes at least screen height */
 }
 
 .glass-panel {
@@ -100,6 +102,25 @@ body {
 
 .btn-primary:active {
   transform: translateY(0);
+}
+
+/* Custom Ripple Animation - Starts clearly OUTSIDE the avatar (scale 1.2) */
+@keyframes ripple {
+  0% {
+    transform: scale(1.2);
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(250, 208, 137, 1);
+  }
+
+  100% {
+    transform: scale(3.0);
+    opacity: 0;
+    box-shadow: 0 0 0 30px rgba(250, 208, 137, 0);
+  }
+}
+
+.animate-ripple {
+  animation: ripple 2.5s cubic-bezier(0, 0.2, 0.8, 1) infinite;
 }
 
 .input-field {
@@ -196,4 +217,17 @@ body {
   z-index: 10;
   text-align: center;
   min-width: 60px;
+}
+
+/* Hide default ReactFlow selection rectangle */
+.react-flow__node.selected .react-flow__handle,
+.react-flow__node.selected {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Ensure our custom breathing light is the only thing visible */
+.react-flow__node:focus {
+  outline: none !important;
 }

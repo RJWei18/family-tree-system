@@ -7,9 +7,10 @@ interface MainLayoutProps {
   children: React.ReactNode;
   currentView: 'members' | 'tree' | 'calendar';
   onViewChange: (view: 'members' | 'tree' | 'calendar') => void;
+  onToggleCalculator: () => void;
 }
 
-export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onViewChange }) => {
+export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onViewChange, onToggleCalculator }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const isDarkMode = useFamilyStore((state) => state.isDarkMode);
@@ -73,7 +74,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
         }}
       >
         <div className="flex justify-between items-center p-6 border-b border-slate-100">
-          <h2 className="text-xl font-bold heading-gradient">FamilyConnect</h2>
+          <h2 className="text-xl font-bold text-[var(--text-main)]">FamilyConnect</h2>
           <button
             onClick={() => setIsMobileMenuOpen(false)}
             className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
@@ -86,8 +87,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
           <button
             onClick={() => handleNavClick('members')}
             className={`flex items-center gap-4 p-4 rounded-xl text-lg font-medium transition-all ${currentView === 'members'
-              ? 'bg-violet-50 text-violet-700 border border-violet-100'
-              : 'hover:bg-slate-50 text-slate-500 hover:text-slate-800'
+              ? 'bg-[var(--accent)] text-[#5D4037]'
+              : 'hover:bg-slate-50 text-[var(--text-muted)]'
               }`}
           >
             <Users size={24} className="shrink-0" />
@@ -96,8 +97,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
           <button
             onClick={() => handleNavClick('tree')}
             className={`flex items-center gap-4 p-4 rounded-xl text-lg font-medium transition-all ${currentView === 'tree'
-              ? 'bg-violet-50 text-violet-700 border border-violet-100'
-              : 'hover:bg-slate-50 text-slate-500 hover:text-slate-800'
+              ? 'bg-[var(--accent)] text-[#5D4037]'
+              : 'hover:bg-slate-50 text-[var(--text-muted)]'
               }`}
           >
             <Network size={24} className="shrink-0" />
@@ -106,8 +107,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
           <button
             onClick={() => handleNavClick('calendar')}
             className={`flex items-center gap-4 p-4 rounded-xl text-lg font-medium transition-all ${currentView === 'calendar'
-              ? 'bg-violet-50 text-violet-700 border border-violet-100'
-              : 'hover:bg-slate-50 text-slate-500 hover:text-slate-800'
+              ? 'bg-[var(--accent)] text-[#5D4037]'
+              : 'hover:bg-slate-50 text-[var(--text-muted)]'
               }`}
           >
             <Calendar size={24} className="shrink-0" />
@@ -130,80 +131,96 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
   ) : null;
 
   return (
-    <div className="flex flex-col md:flex-row w-full h-full bg-[var(--bg-main)] text-[var(--text-main)] font-sans overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-[var(--bg-main)] text-[var(--text-main)] font-sans">
+      {/* Sticky Top Header (Desktop & Mobile) */}
+      <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-white/70 dark:bg-slate-900/80 border-b border-[var(--border-color)] shadow-sm transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
 
-      {/* Mobile Header - Bright & Clean */}
-      <div className="md:hidden flex items-center justify-between p-4 px-5 border-b border-slate-200 bg-white/90 backdrop-blur-sm shrink-0 z-30 sticky top-0 shadow-sm">
-        <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold heading-gradient">FamilyConnect</h1>
+          {/* Logo Area */}
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold text-[var(--text-main)] flex items-center gap-2">
+              <span className="text-2xl">🌳</span>
+              <span>FamilyConnect</span>
+            </h1>
+          </div>
+
+          {/* Desktop Navigation (Centered Tabs) */}
+          <nav className="hidden md:flex items-center gap-2">
+            {[
+              { id: 'members', label: '成員管理', icon: Users },
+              { id: 'tree', label: '家族樹', icon: Network },
+              { id: 'calendar', label: '壽星月曆', icon: Calendar },
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id as any)}
+                className={`
+                  flex items-center gap-2 px-4 py-2 rounded-full transition-all text-sm font-medium
+                  ${currentView === item.id
+                    ? 'bg-[var(--accent)] text-[#5D4037] shadow-sm'
+                    : 'text-[var(--text-muted)] hover:bg-[var(--bg-card-hover)]'}
+                `}
+              >
+                <item.icon size={18} />
+                <span>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+
+          {/* Right Actions */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full hover:bg-[var(--bg-card-hover)] text-[var(--text-muted)] transition-colors"
+            >
+              {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-2 rounded-full hover:bg-[var(--bg-card-hover)] text-[var(--text-muted)]"
+            >
+              <Menu size={24} />
+            </button>
+          </div>
         </div>
-        <button
-          onClick={() => setIsMobileMenuOpen(true)}
-          className="p-2.5 -mr-2 hover:bg-slate-100 rounded-full transition-colors text-slate-600 active:scale-95 touch-manipulation z-40 relative"
-          aria-label="開啟選單"
-        >
-          <Menu size={28} />
-        </button>
-      </div>
+      </header>
 
       {/* Render Mobile Menu via Portal */}
       {mounted && mobileMenu && createPortal(mobileMenu, document.body)}
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 glass-panel m-4 flex-col p-5 gap-6 border-r-0 shrink-0 bg-white/60 dark:bg-slate-800/80 dark:border dark:border-slate-700">
-        <div className="px-2 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold heading-gradient mb-1">
-              FamilyConnect
-            </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">家族系譜管理系統</p>
-          </div>
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors"
-          >
-            {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
+      {/* Content Area */}
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 flex flex-col relative">
+        <div className="glass-panel rounded-2xl shadow-lg border border-white/50 relative bg-white/50 flex flex-col flex-1">
+          {children}
         </div>
-
-        <nav className="flex flex-col gap-3 mt-4">
-          <button
-            onClick={() => handleNavClick('members')}
-            className={`flex items-center gap-3 p-3.5 rounded-xl transition-all font-medium ${currentView === 'members'
-              ? 'bg-gradient-to-r from-violet-50 to-white text-violet-700 shadow-sm border border-violet-100'
-              : 'hover:bg-white/50 text-slate-500 hover:text-slate-800'
-              }`}
-          >
-            <Users size={20} />
-            成員管理
-          </button>
-          <button
-            onClick={() => handleNavClick('tree')}
-            className={`flex items-center gap-3 p-3.5 rounded-xl transition-all font-medium ${currentView === 'tree'
-              ? 'bg-gradient-to-r from-violet-50 to-white text-violet-700 shadow-sm border border-violet-100'
-              : 'hover:bg-white/50 text-slate-500 hover:text-slate-800'
-              }`}
-          >
-            <Network size={20} />
-            家族樹狀圖
-          </button>
-          <button
-            onClick={() => handleNavClick('calendar')}
-            className={`flex items-center gap-3 p-3.5 rounded-xl transition-all font-medium ${currentView === 'calendar'
-              ? 'bg-gradient-to-r from-violet-50 to-white text-violet-700 shadow-sm border border-violet-100'
-              : 'hover:bg-white/50 text-slate-500 hover:text-slate-800'
-              }`}
-          >
-            <Calendar size={20} />
-            壽星月曆
-          </button>
-        </nav>
-      </aside>
-
-      {/* Content Area - Clean White Card */}
-      <main className="flex-1 md:m-4 md:ml-0 m-0 glass-panel md:rounded-2xl rounded-none border-x-0 md:border-x border-b-0 md:border-b overflow-hidden relative shadow-xl flex flex-col z-0 bg-white/80">
-        {children}
       </main>
+
+      {/* Floating Tool Button - Uses Portal to escape container context (backdrop-filter) */}
+      {mounted && createPortal(
+        <div
+          className="fixed z-[99999] pointer-events-auto"
+          style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 99999 }}
+        >
+          <button
+            onClick={() => {
+              console.log('Calculator button clicked');
+              onToggleCalculator();
+            }}
+            className="p-4 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center animate-bounce-slow"
+            title="開啟稱謂計算機"
+            style={{ animationDuration: '3s' }}
+          >
+            <div className="relative">
+              <Calendar size={24} className="hidden" /> {/* Dummy to keep import valid if needed */}
+              {/* Calculator Icon */}
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" /><line x1="8" x2="16" y1="6" y2="6" /><line x1="16" x2="16" y1="14" y2="18" /><path d="M16 10h.01" /><path d="M12 10h.01" /><path d="M8 10h.01" /><path d="M12 14h.01" /><path d="M8 14h.01" /><path d="M12 18h.01" /><path d="M8 18h.01" /></svg>
+            </div>
+          </button>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

@@ -1,26 +1,18 @@
 import { memo, useMemo } from 'react';
 import { Handle, Position } from 'reactflow';
 import type { Member } from '../../types';
-import { User, Skull, Briefcase } from 'lucide-react';
 import { useFamilyStore } from '../../store/useFamilyStore';
-import { calculateRelationship } from '../../utils/kinship';
 import { calculateAge } from '../../utils/dateHelpers';
 import { getZodiac, getZodiacName } from '../../utils/zodiac';
+import { FamilyAvatar } from '../common/FamilyAvatar';
 
 interface CustomNodeProps {
   data: Member;
 }
 
 export const CustomNode = memo(({ data }: CustomNodeProps) => {
-  const members = useFamilyStore(s => s.members);
-  const relationships = useFamilyStore(s => s.relationships);
-  const rootMemberId = useFamilyStore(s => s.rootMemberId);
   const highlightedMemberId = useFamilyStore(s => s.highlightedMemberId);
   const isHighlighted = highlightedMemberId === data.id;
-
-  const title = useMemo(() => {
-    return calculateRelationship(rootMemberId, data.id, members, relationships);
-  }, [rootMemberId, data.id, members, relationships]);
 
   const age = useMemo(() => {
     const ageStr = calculateAge(data.dateOfBirth, data.dateOfDeath);
@@ -29,8 +21,6 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
 
   const isDeceased = data.status === '殁' || data.status === 'Deceased' || !!data.dateOfDeath;
   const zodiac = getZodiac(data.dateOfBirth || '');
-
-  // bgClass replaced by fixed CSS classes .family-node-container and .avatar-wrapper
 
   return (
     <div className={`family-node-container ${isDeceased ? 'node-deceased' : ''} group relative`}>
@@ -51,20 +41,37 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
         style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 0, height: 0, opacity: 0, border: 0 }}
       />
 
-      {/* Highlight Ring */}
-      {isHighlighted && (
-        <div className="absolute inset-0 rounded-full ring-4 ring-amber-400 z-50 scale-110 pointer-events-none" style={{ borderRadius: '50%' }} />
-      )}
+      {/* Avatar Group Container - Ensures Layout & Highlight Centering */}
+      <div className="relative flex items-center justify-center w-20 h-20">
 
-      {/* Avatar Section */}
-      <div className="avatar-wrapper shadow-sm">
-        {data.photoUrl ? (
-          <img src={data.photoUrl} alt={data.firstName} className="w-full h-full object-cover" />
-        ) : (
-          <div className={`w-full h-full flex items-center justify-center ${data.gender === 'male' ? 'bg-[#E3F2FD] text-[#2196F3]' : data.gender === 'female' ? 'bg-[#FCE4EC] text-[#E91E63]' : 'bg-slate-100 text-slate-400'}`}>
-            <User size={32} strokeWidth={2.5} />
+        {/* Highlight Effects - Behind Avatar (Z-0) to create outer breathing light */}
+        {isHighlighted && (
+          // Fixed Centered Container for Ripple - Explicit sizes to be circular
+          <div
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center pointer-events-none z-0 rounded-full"
+            style={{ borderRadius: '50%' }}
+          >
+            {/* Steady Outer Glow - Halo */}
+            <div className="absolute inset-0 rounded-full border-[4px] border-[#FAD089]/50 shadow-[0_0_20px_rgba(250,208,137,0.6)]" style={{ borderRadius: '50%' }} />
+
+            {/* Expanding Breathing Ripple 1 */}
+            <div className="absolute inset-0 rounded-full border-[2px] border-[#FAD089] animate-ripple opacity-80" style={{ borderRadius: '50%' }} />
+
+            {/* Expanding Breathing Ripple 2 (Delayed) */}
+            <div className="absolute inset-0 rounded-full border-[2px] border-[#FAD089] animate-ripple opacity-60" style={{ animationDelay: '0.6s', borderRadius: '50%' }} />
           </div>
         )}
+
+        {/* Avatar Component - Z-10 to sit ABOVE highlight */}
+        <div className="relative z-10 w-full h-full">
+          <FamilyAvatar
+            src={data.photoUrl}
+            gender={data.gender}
+            isDeceased={isDeceased}
+            size="lg" // 80px
+            className="shadow-sm transition-transform duration-300 hover:scale-105"
+          />
+        </div>
       </div>
 
       {/* Name Ribbon */}

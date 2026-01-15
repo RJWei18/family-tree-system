@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useFamilyStore } from '../../store/useFamilyStore';
 import { calculateRelationship } from '../../utils/kinship';
 import { X, Calculator, ArrowRightLeft } from 'lucide-react';
@@ -31,11 +32,17 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
 
     if (!isOpen) return null;
 
-    return (
-        // Non-blocking container positioned consistently
-        <div className="fixed bottom-24 right-6 z-[100] flex flex-col items-end pointer-events-none">
-            {/* The Card itself - pointer-events-auto to allow interaction */}
-            <div className="bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl shadow-xl p-6 w-80 pointer-events-auto animate-in fade-in slide-in-from-bottom-4 duration-200" style={{ backgroundColor: 'var(--bg-card)', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)' }}>
+    return createPortal(
+        // Modal Overlay - Centered and High Z-Index
+        <div
+            className="fixed inset-0 z-[100000] flex items-center justify-center p-4"
+            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+        >
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose} />
+
+            {/* The Card */}
+            <div className="bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl shadow-2xl p-6 w-full max-w-sm pointer-events-auto relative animate-in zoom-in-95 duration-200" style={{ backgroundColor: 'var(--bg-card)' }}>
                 <button
                     onClick={onClose}
                     className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
@@ -115,6 +122,7 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
