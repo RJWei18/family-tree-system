@@ -2,126 +2,6 @@ import dagre from 'dagre';
 import type { Node, Edge } from 'reactflow';
 import type { Member, Relationship } from '../types';
 
-const nodeWidth = 160; // Reduced from 280 (Node is 120px)
-const nodeHeight = 180; // Increased spacing for tree height
-
-export const getLayoutedElements = (
-  nodes: Node[],
-  edges: Edge[],
-  direction = 'TB'
-) => {
-  const dagreGraph = new dagre.graphlib.Graph();
-  dagreGraph.setDefaultEdgeLabel(() => ({}));
-  // Increase spacing to prevent children from overlapping neighbors
-  dagreGraph.setGraph({
-    rankdir: direction,
-    ranksep: 200, // Vertical spacing between generations
-    nodesep: 150, // Horizontal spacing between sibling groups
-    edgesep: 50   // Spacing between edges
-  });
-
-  const nodeToGroupMap: Record<string, string> = {};
-  const groupToNodesMap: Record<string, string[]> = {};
-
-  nodes.forEach(node => {
-    if (node.id.startsWith('marriage_')) {
-      const parts = node.id.replace('marriage_', '').split('_');
-      const [spouseA, spouseB] = parts;
-      const groupId = `group_${parts.join('_')}`;
-
-      nodeToGroupMap[spouseA] = groupId;
-      nodeToGroupMap[spouseB] = groupId;
-      nodeToGroupMap[node.id] = groupId;
-      groupToNodesMap[groupId] = [spouseA, spouseB, node.id];
-    }
-  });
-
-  const processedGroups = new Set<string>();
-
-  nodes.forEach((node) => {
-    const groupId = nodeToGroupMap[node.id];
-    if (groupId) {
-      if (!processedGroups.has(groupId)) {
-        // Couple Group Width: 2 Nodes + 40px spacing
-        // Width = 120 (Node) + 40 (Space) + 120 (Node) = 280
-        // We use slightly larger for Dagre buffer
-        dagreGraph.setNode(groupId, { width: 320, height: nodeHeight });
-        processedGroups.add(groupId);
-      }
-    } else {
-      dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
-    }
-  });
-
-  edges.forEach((edge) => {
-    const source = nodeToGroupMap[edge.source] || edge.source;
-    const target = nodeToGroupMap[edge.target] || edge.target;
-    if (source !== target) {
-      dagreGraph.setEdge(source, target);
-    }
-  });
-
-  dagre.layout(dagreGraph);
-
-  const layoutedNodes = nodes.map((node) => {
-    const groupId = nodeToGroupMap[node.id];
-
-    if (groupId) {
-      const groupPos = dagreGraph.node(groupId);
-      const [spouseA, spouseB, marriageId] = groupToNodesMap[groupId];
-
-      // Layout: [SpouseA] - 40px - [SpouseB]
-      // MarriageNode in exact center
-
-      const center = groupPos.x;
-      const spacing = 40;
-      const explicitNodeWidth = 120; // Visual width
-
-      // Spouse A (Left) center = GroupCenter - (Spacing/2) - (NodeWidth/2)
-      // Spouse B (Right) center = GroupCenter + (Spacing/2) + (NodeWidth/2)
-      // Marriage Node = GroupCenter
-
-      let newX = center;
-
-      if (node.id === spouseA) {
-        newX = center - (spacing / 2) - (explicitNodeWidth / 2);
-      } else if (node.id === spouseB) {
-        newX = center + (spacing / 2) + (explicitNodeWidth / 2);
-      } else if (node.id === marriageId) {
-        newX = center;
-      }
-
-      const isMarriage = node.id.startsWith('marriage_');
-      return {
-        ...node,
-        position: {
-          x: newX - (isMarriage ? 10 : explicitNodeWidth / 2), // Adjust for anchor (top-left vs center)
-          // Note: ReactFlow position is Top-Left by default. 
-          // If we want 'newX' to be the center, we subtract half width.
-          // Node visual width 120. Marriage node width 20.
-
-          y: groupPos.y - (nodeHeight / 2),
-        },
-        style: isMarriage ? {
-          opacity: 1, // Make it visible for debugging, or keep semi-visible as connector
-          width: 20, height: 20, background: '#8D6E63', borderRadius: '50%', border: '2px solid white', zIndex: 0
-        } : undefined
-      };
-    } else {
-      const nodeWithPosition = dagreGraph.node(node.id);
-      return {
-        ...node,
-        position: {
-          x: nodeWithPosition.x - nodeWidth / 2,
-          y: nodeWithPosition.y - nodeHeight / 2,
-        },
-      };
-    }
-  });
-
-  return { nodes: layoutedNodes, edges };
-};
-
 export const buildGraph = (
   members: Record<string, Member>,
   relationships: Relationship[]
@@ -150,7 +30,7 @@ export const buildGraph = (
         // Add Virtual Node
         nodes.push({
           id: marriageId,
-          type: 'default', // Using default dot node for now, or 'output'
+          type: 'virtual', // Use custom virtual node
           data: { label: '' },
           position: { x: 0, y: 0 },
           draggable: true // Allow dragging
@@ -165,22 +45,40 @@ export const buildGraph = (
       // But Dagre sorting might flip them. 
       // Simplified: Just use side handles for both.
 
-      edges.push({
-        id: `edge_${r.sourceMemberId}_${mId}`,
-        source: r.sourceMemberId,
-        target: mId,
-        sourceHandle: 'right', // Connect from Right side of Spouse
-        targetHandle: null,    // To Center of Marriage Node
-        style: { stroke: '#8D6E63', strokeWidth: 2 }
-      });
-      edges.push({
-        id: `edge_${r.targetMemberId}_${mId}`,
-        source: r.targetMemberId,
-        target: mId,
-        sourceHandle: 'left', // Connect from Left side of Spouse
-        targetHandle: null,   // To Center of Marriage Node
-        style: { stroke: '#8D6E63', strokeWidth: 2 }
-      });
+      // Use sorted IDs to determine left/right position
+      const sortedIds = [r.sourceMemberId, r.targetMemberId].sort();
+      const [leftSpouseId] = sortedIds;
+
+      const edgeIdSpouseA = `edge_${r.sourceMemberId}_${mId}`;
+      const edgeIdSpouseB = `edge_${r.targetMemberId}_${mId}`;
+
+      // Helper to determin handle
+      const getHandle = (nodeId: string) => nodeId === leftSpouseId ? 'right' : 'left';
+
+      // Check if edges already exist to avoid duplicates
+      if (!edges.find(e => e.id === edgeIdSpouseA)) {
+        edges.push({
+          id: edgeIdSpouseA,
+          source: r.sourceMemberId,
+          target: mId,
+          sourceHandle: getHandle(r.sourceMemberId), // If Left Spouse, connect from Right
+          targetHandle: 't', // Connect to Top/Target handle of Virtual Node
+          type: 'straight', // Force straight line for T-shape
+          style: { stroke: '#8D6E63', strokeWidth: 2 }
+        });
+      }
+
+      if (!edges.find(e => e.id === edgeIdSpouseB)) {
+        edges.push({
+          id: edgeIdSpouseB,
+          source: r.targetMemberId,
+          target: mId,
+          sourceHandle: getHandle(r.targetMemberId), // If Right Spouse, connect from Left
+          targetHandle: 't', // Connect to Top/Target handle of Virtual Node
+          type: 'straight', // Force straight line for T-shape
+          style: { stroke: '#8D6E63', strokeWidth: 2 }
+        });
+      }
     }
   });
 
@@ -225,10 +123,17 @@ export const buildGraph = (
         }
       }
 
+      const isMarriage = sourceId.startsWith('marriage_');
+
+      // Prevent duplicate edges
+      const edgeId = `edge_${sourceId}_${r.targetMemberId}`;
+      if (edges.find(e => e.id === edgeId)) return;
+
       edges.push({
-        id: r.id,
+        id: edgeId, // Use deterministic ID instead of r.id which might be unique per relationship entry but maps to same visual edge
         source: sourceId,
         target: r.targetMemberId,
+        sourceHandle: isMarriage ? 's' : null, // If connection from marriage node, use Bottom/'s' handle
         type: 'smoothstep',
         animated: false,
         style: { stroke: '#8D6E63', strokeWidth: 2 }
@@ -237,4 +142,182 @@ export const buildGraph = (
   });
 
   return { nodes, edges };
+};
+
+export const getLayoutedElements = (nodes: any[], edges: any[]) => {
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+  const nodeWidth = 220; // Enough for node + spacing
+  const nodeHeight = 220; // Height of node slot
+
+  dagreGraph.setGraph({ rankdir: 'TB', nodesep: 100, ranksep: 200 });
+
+  // Helpers to identify groups
+  const nodeToGroupMap: Record<string, string> = {};
+  const groupToNodesMap: Record<string, string[]> = {};
+
+  nodes.forEach(node => {
+    if (node.id.startsWith('marriage_')) {
+      // It's a virtual node (marriage center)
+      // We can find who belongs to this marriage based on ID?
+      // Actually, we grouped spouses in 'buildGraph' but didn't assign them a group ID property in the node object itself
+      // We need to infer groups from the marriage ID or vice versa.
+    }
+  });
+
+  // Re-scan edges to define groups (Spouse + Spouse + MarriageNode)
+  // Or simpler: Iterate nodes. If node is spouse, find if they have a marriage node connected.
+
+  // Strategy:
+  // 1. Identify "Marriage Groups": [SpouseA, SpouseB, MarriageNode]
+  //    - MarriageNode ID: `marriage_SpouseA_SpouseB` (sorted)
+  //    - Nodes: SpouseA, SpouseB, MarriageNode.
+
+  nodes.forEach(node => {
+    if (node.id.startsWith('marriage_')) {
+      const parts = node.id.replace('marriage_', '').split('_');
+      const groupName = `group_${parts.join('_')}`;
+
+      parts.forEach(memberId => {
+        nodeToGroupMap[memberId] = groupName;
+        if (!groupToNodesMap[groupName]) groupToNodesMap[groupName] = [];
+        if (!groupToNodesMap[groupName].includes(memberId)) groupToNodesMap[groupName].push(memberId);
+      });
+
+      // Also add the marriage node itself to the group
+      nodeToGroupMap[node.id] = groupName;
+      if (!groupToNodesMap[groupName]) groupToNodesMap[groupName] = [];
+      groupToNodesMap[groupName].push(node.id);
+    }
+  });
+
+  nodes.forEach((node) => {
+    // Check if node is part of a group
+    const groupId = nodeToGroupMap[node.id];
+    if (groupId) {
+      // If it's a group member, we don't set it individually in Dagre
+      // We set the GROUP node instead below
+    } else {
+      dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    }
+  });
+
+  // Set Group Nodes in Dagre
+  Object.keys(groupToNodesMap).forEach(groupId => {
+    // Group width = 2 * SpouseWidth + Spacing
+    // 120 * 2 + 40 = 280. + Padding = 320.
+    dagreGraph.setNode(groupId, { width: 320, height: nodeHeight });
+  });
+
+  edges.forEach((edge) => {
+    // Map edges to Groups if nodes are in groups
+    const sourceGroup = nodeToGroupMap[edge.source] || edge.source;
+    const targetGroup = nodeToGroupMap[edge.target] || edge.target;
+
+    if (sourceGroup !== targetGroup) {
+      dagreGraph.setEdge(sourceGroup, targetGroup);
+    }
+  });
+
+  dagre.layout(dagreGraph);
+
+  const newNodes = nodes.map((node) => {
+    // If node is in a group, position it relative to group
+    const groupId = nodeToGroupMap[node.id];
+    if (groupId) {
+      const groupPos = dagreGraph.node(groupId);
+
+      const parts = groupId.replace('group_', '').split('_');
+      // parts is sorted IDs: [SmallerID, LargerID] aka [SpouseA, SpouseB]
+      // SpouseA is LEFT. SpouseB is RIGHT.
+      const spouseA = parts[0];
+      const spouseB = parts[1];
+      const marriageId = `marriage_${groupId.replace('group_', '')}`;
+
+      const spacing = 40;
+      const explicitNodeWidth = 120; // Visual width
+
+      // Geometric Logic:
+      // Group Width = 320 (Arbitrary DAGRE box).
+      // Real content width = 120 + 40 + 120 = 280.
+      // Center of Real Content = Center of GroupBox (assuming Dagre centers content).
+
+      // Center X = groupPos.x.
+      // Spouse A Center = Center X - (Spacing/2 + Width/2) = X - 20 - 60 = X - 80.
+      // Spouse B Center = Center X + (Spacing/2 + Width/2) = X + 20 + 60 = X + 80.
+
+      // TopLeft A = Center A - 60 = X - 140.
+      // TopLeft B = Center B - 60 = X + 20.
+
+      // Marriage Node Center = Center X.
+
+      let xPos = 0;
+
+      if (node.id === spouseA) {
+        // Spouse A is Left.
+        // Position is Top-Left.
+        // Gap Center is at groupPos.x
+        // Spouse A Right Edge is at groupPos.x - (spacing/2)
+        // Spouse A TopLeft = groupPos.x - (spacing/2) - explicitNodeWidth
+        xPos = groupPos.x - (spacing / 2) - explicitNodeWidth;
+      } else if (node.id === spouseB) {
+        // Spouse B is Right.
+        // Left Edge is at groupPos.x + (spacing/2)
+        // TopLeft = groupPos.x + (spacing/2)
+        xPos = groupPos.x + (spacing / 2);
+      } else if (node.id === marriageId) {
+        // Marriage Node is Virtual (1x1).
+        // It should be centred at groupPos.x
+        // ReactFlow position is Top-Left.
+        // For 1x1 node to be centered at X, TopLeft should be X - 0.5.
+        // But actually, we want the HANDLES to align.
+        // VirtualNode has center-aligned logic?
+        // If we just put it at X, and width is 1. It is from X to X+1.
+        // Essentially centered.
+        xPos = groupPos.x;
+      }
+
+      const isMarriage = node.id.startsWith('marriage_');
+
+      // Y Alignment
+      // GroupY is center of row.
+      // Spouse Node Height = 180 (slot). Visual ~120?
+      // Handle is at Top + 40 (approx).
+      // We want Handle Y to be consistent.
+      // If we place Spouse Top at Y, Handle is at Y + 40.
+      // We want Marriage Node (Virtual) at Y + 40.
+
+      const topY = groupPos.y - (nodeHeight / 2);
+
+      // Marriage Node Y matches the Handle Line.
+      // Spouse Node Y = topY.
+      // Marriage Node Y = topY + 40.
+
+      const yPos = topY + (isMarriage ? 40 : 0);
+
+      return {
+        ...node,
+        position: {
+          x: xPos,
+          y: yPos,
+        },
+        style: isMarriage ? {
+          opacity: 1,
+          width: 1, height: 1, background: 'transparent', zIndex: 0
+        } : undefined
+      };
+    } else {
+      const nodeWithPosition = dagreGraph.node(node.id);
+      return {
+        ...node,
+        position: {
+          x: nodeWithPosition.x - nodeWidth / 2,
+          y: nodeWithPosition.y - nodeHeight / 2,
+        },
+      };
+    }
+  });
+
+  return { nodes: newNodes, edges };
 };

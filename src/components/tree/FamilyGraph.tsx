@@ -1,40 +1,53 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
-import ReactFlow, { Controls, MiniMap, Panel, useNodesState, useEdgesState } from 'reactflow';
+import ReactFlow, { Controls, MiniMap, Panel, useNodesState, useEdgesState, useReactFlow, ReactFlowProvider } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useFamilyStore } from '../../store/useFamilyStore';
 import { CustomNode } from './CustomNode';
+import { VirtualNode } from './VirtualNode';
 import { buildGraph, getLayoutedElements } from '../../utils/layout';
 import { TreeSearch } from './TreeSearch';
 import { ExportButton } from './ExportButton';
 
-export const FamilyGraph: React.FC = () => {
+const FamilyGraphContent: React.FC = () => {
     const members = useFamilyStore(s => s.members);
     const relationships = useFamilyStore(s => s.relationships);
     const isDarkMode = useFamilyStore((state) => state.isDarkMode);
+    const { fitView } = useReactFlow();
 
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
     const nodeTypes = useMemo(() => ({
         custom: CustomNode,
+        virtual: VirtualNode
     }), []);
 
     const onLayout = useCallback(() => {
         const { nodes: builtNodes, edges: builtEdges } = buildGraph(members, relationships);
+
         const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
             builtNodes,
             builtEdges
         );
+
         setNodes([...layoutedNodes]);
         setEdges([...layoutedEdges]);
-    }, [members, relationships, setNodes, setEdges]);
+
+        // Force fit view after small delay to allow render
+        window.requestAnimationFrame(() => {
+            fitView({ padding: 0.2 });
+        });
+    }, [members, relationships, setNodes, setEdges, fitView]);
 
     useEffect(() => {
-        onLayout();
-    }, [onLayout]);
+        // Only run layout if we have members
+        if (Object.keys(members).length > 0) {
+            onLayout();
+        }
+    }, [onLayout, members]);
 
     return (
-        <div className="w-full h-full relative bg-[#F9F4E8] dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
+        <div className="w-full h-full flex-1 relative bg-[#F9F4E8] dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
             {/* Background Image with Opacity */}
             <div
                 className="absolute inset-0 z-0 pointer-events-none"
@@ -83,5 +96,13 @@ export const FamilyGraph: React.FC = () => {
                 </Panel>
             </ReactFlow>
         </div>
+    );
+};
+
+export const FamilyGraph: React.FC = () => {
+    return (
+        <ReactFlowProvider>
+            <FamilyGraphContent />
+        </ReactFlowProvider>
     );
 };

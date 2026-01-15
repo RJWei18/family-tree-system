@@ -29,9 +29,9 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
       <Handle type="target" position={Position.Top} className="!w-1 !h-1 !bg-transparent !border-none" />
       <Handle type="source" position={Position.Bottom} className="!w-1 !h-1 !bg-transparent !border-none" />
 
-      {/* Left/Right for Spouse Connections (Restored) */}
-      <Handle type="source" position={Position.Left} id="left" className="!w-1 !h-1 !bg-transparent !border-none !top-1/2" />
-      <Handle type="source" position={Position.Right} id="right" className="!w-1 !h-1 !bg-transparent !border-none !top-1/2" />
+      {/* Left/Right for Spouse Connections (Restored) - Aligned with Avatar Center (40px) */}
+      <Handle type="source" position={Position.Left} id="left" className="!w-1 !h-1 !bg-transparent !border-none !top-[38px]" />
+      <Handle type="source" position={Position.Right} id="right" className="!w-1 !h-1 !bg-transparent !border-none !top-[38px]" />
 
       {/* Center Handle for complex routing if needed */}
       <Handle
