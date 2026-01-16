@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { getOptimizedImageUrl } from '../../utils/imageHelpers';
+import { calculateGenerations } from '../../utils/generationHelpers';
 import { createPortal } from 'react-dom';
 import {
     createColumnHelper,
@@ -147,6 +148,8 @@ export const MemberTable: React.FC<MemberTableProps> = ({ onEdit, isBatchMode, o
             gender: 'male',
         });
     };
+    const relationships = useFamilyStore((state) => state.relationships);
+    const generationMap = useMemo(() => calculateGenerations(membersMap, relationships), [membersMap, relationships]);
 
     const columns = useMemo(() => {
         const cols = [
@@ -219,6 +222,34 @@ export const MemberTable: React.FC<MemberTableProps> = ({ onEdit, isBatchMode, o
                         {info.row.original.lastName}{info.row.original.firstName}
                     </span>;
                 },
+            }),
+            columnHelper.accessor('id', {
+                id: 'generation',
+                header: '世代',
+                cell: info => {
+                    const gen = generationMap[info.getValue()];
+                    return (
+                        <div className="flex items-center gap-1">
+                            {gen ? (
+                                <span className={`
+                                    px-2 py-0.5 rounded-full text-xs font-bold
+                                    ${gen === 1 ? 'bg-amber-100 text-amber-700' :
+                                        gen === 2 ? 'bg-sky-100 text-sky-700' :
+                                            gen === 3 ? 'bg-emerald-100 text-emerald-700' :
+                                                'bg-slate-100 text-slate-600'}
+                                `}>
+                                    第 {gen} 代
+                                </span>
+                            ) : '-'}
+                        </div>
+                    );
+                },
+                sortingFn: (rowA, rowB) => {
+                    const genA = generationMap[rowA.original.id] || 999;
+                    const genB = generationMap[rowB.original.id] || 999;
+                    return genA - genB;
+                },
+                enableSorting: true,
             }),
             columnHelper.display({
                 id: 'kinshipTitle',
