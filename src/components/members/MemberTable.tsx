@@ -14,7 +14,7 @@ import type { Member } from '../../types';
 import { useFamilyStore } from '../../store/useFamilyStore';
 import { calculateRelationship } from '../../utils/kinship';
 import { calculateAge } from "../../utils/dateHelpers";
-import { getZodiac, getZodiacName } from "../../utils/zodiac";
+import { getZodiac, getZodiacName, getHoroscope } from "../../utils/zodiac";
 import { Edit, Trash2, User, Plus, Crown, Check, Briefcase, ArrowUp, ArrowDown } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -353,6 +353,37 @@ export const MemberTable: React.FC<MemberTableProps> = ({ onEdit, isBatchMode, o
                         <span>{n || '-'}</span>
                     </span>;
                 }
+            }),
+            columnHelper.accessor((row) => {
+                const h = getHoroscope(row.dateOfBirth || '');
+                return h ? h.index : -1;
+            }, {
+                id: 'horoscope',
+                header: ({ column }) => (
+                    <div className="flex items-center gap-1 cursor-pointer select-none hover:text-slate-900 transition-colors" onClick={column.getToggleSortingHandler()}>
+                        <span>星座</span>
+                        {{
+                            asc: <ArrowUp size={14} className="text-violet-500" />,
+                            desc: <ArrowDown size={14} className="text-violet-500" />,
+                        }[column.getIsSorted() as string] ?? <div className="w-[14px]" />}
+                    </div>
+                ),
+                cell: (info) => {
+                    const h = getHoroscope(info.row.original.dateOfBirth || '');
+                    return (
+                        <div className="flex items-center gap-1 min-w-[70px]">
+                            {h ? (
+                                <>
+                                    <span className="text-lg leading-none filter grayscale-[0.2]">{h.icon}</span>
+                                    <span className="text-sm text-slate-600 font-medium">{h.name}</span>
+                                </>
+                            ) : (
+                                <span className="text-slate-300">-</span>
+                            )}
+                        </div>
+                    );
+                },
+                sortingFn: 'basic',
             }),
             columnHelper.accessor('dateOfBirth', {
                 header: '生日',

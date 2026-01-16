@@ -3,6 +3,7 @@ import { useFamilyStore } from '../store/useFamilyStore';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Cake } from 'lucide-react';
 import type { Member } from '../types';
 import { calculateAge } from '../utils/dateHelpers';
+import { getHoroscope } from '../utils/zodiac';
 import { FamilyAvatar } from '../components/common/FamilyAvatar';
 
 export const BirthdayCalendar: React.FC = () => {
@@ -101,8 +102,13 @@ export const BirthdayCalendar: React.FC = () => {
                                             <div className="font-bold text-sm text-[var(--text-main)] truncate mb-0.5">
                                                 {member.lastName}{member.firstName}
                                             </div>
-                                            <div className="text-xs text-[var(--text-muted)] truncate">
-                                                {age > 0 ? `${age} 歲` : '生日快樂'}
+                                            <div className="text-xs text-[var(--text-muted)] truncate flex items-center gap-2">
+                                                <span>{age > 0 ? `${age} 歲` : '生日快樂'}</span>
+                                                {member.dateOfBirth && getHoroscope(member.dateOfBirth) && (
+                                                    <span className="text-slate-400" title={getHoroscope(member.dateOfBirth)?.name}>
+                                                        {getHoroscope(member.dateOfBirth)?.icon}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

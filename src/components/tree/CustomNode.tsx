@@ -3,7 +3,7 @@ import { Handle, Position } from 'reactflow';
 import type { Member } from '../../types';
 import { useFamilyStore } from '../../store/useFamilyStore';
 import { calculateAge } from '../../utils/dateHelpers';
-import { getZodiac, getZodiacName } from '../../utils/zodiac';
+import { getZodiac, getZodiacName, getHoroscope } from '../../utils/zodiac';
 import { FamilyAvatar } from '../common/FamilyAvatar';
 import { BreathingHalo } from './BreathingHalo';
 
@@ -26,6 +26,7 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
   const isDeceased = data.status === '殁' || data.status === 'Deceased' || !!data.dateOfDeath;
   const zodiac = getZodiac(data.dateOfBirth || '');
   const zodiacName = getZodiacName(data.dateOfBirth || '');
+  const horoscope = getHoroscope(data.dateOfBirth || '');
 
   return (
     <div className={`family-node-container ${isDeceased ? 'node-deceased' : ''} group relative`}>
@@ -82,6 +83,7 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
         <span className="text-[10px] opacity-80 mt-0.5 font-normal flex items-center gap-1">
           <span>{age}</span>
           {zodiac && <span>{zodiac}</span>}
+          {horoscope && <span title={horoscope.name}>{horoscope.icon}</span>}
         </span>
       </div>
 
