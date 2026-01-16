@@ -5,14 +5,18 @@ import { useFamilyStore } from '../../store/useFamilyStore';
 import { calculateAge } from '../../utils/dateHelpers';
 import { getZodiac, getZodiacName } from '../../utils/zodiac';
 import { FamilyAvatar } from '../common/FamilyAvatar';
+import { BreathingHalo } from './BreathingHalo';
 
 interface CustomNodeProps {
   data: Member;
 }
 
+const HANDLE_OFFSET = '38px'; // Centralized handle positioning
+
 export const CustomNode = memo(({ data }: CustomNodeProps) => {
-  const highlightedMemberId = useFamilyStore(s => s.highlightedMemberId);
-  const isHighlighted = highlightedMemberId === data.id;
+  // Performance Optimization: Granular Selector
+  // Only re-render if THIS node's highlight status changes
+  const isHighlighted = useFamilyStore((state) => state.highlightedMemberId === data.id);
 
   const age = useMemo(() => {
     const ageStr = calculateAge(data.dateOfBirth, data.dateOfDeath);
@@ -21,6 +25,7 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
 
   const isDeceased = data.status === '殁' || data.status === 'Deceased' || !!data.dateOfDeath;
   const zodiac = getZodiac(data.dateOfBirth || '');
+  const zodiacName = getZodiacName(data.dateOfBirth || '');
 
   return (
     <div className={`family-node-container ${isDeceased ? 'node-deceased' : ''} group relative`}>
@@ -29,11 +34,23 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
       <Handle type="target" position={Position.Top} className="!w-1 !h-1 !bg-transparent !border-none" />
       <Handle type="source" position={Position.Bottom} className="!w-1 !h-1 !bg-transparent !border-none" />
 
-      {/* Left/Right for Spouse Connections (Restored) - Aligned with Avatar Center (40px) */}
-      <Handle type="source" position={Position.Left} id="left" className="!w-1 !h-1 !bg-transparent !border-none !top-[38px]" />
-      <Handle type="source" position={Position.Right} id="right" className="!w-1 !h-1 !bg-transparent !border-none !top-[38px]" />
+      {/* Left/Right for Spouse Connections - Aligned with Avatar Center */}
+      <Handle
+        type="source"
+        position={Position.Left}
+        id="left"
+        className="!w-1 !h-1 !bg-transparent !border-none"
+        style={{ top: HANDLE_OFFSET }}
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="right"
+        className="!w-1 !h-1 !bg-transparent !border-none"
+        style={{ top: HANDLE_OFFSET }}
+      />
 
-      {/* Center Handle for complex routing if needed */}
+      {/* Center Handle for complex routing */}
       <Handle
         type="source"
         position={Position.Bottom}
@@ -41,26 +58,11 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
         style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 0, height: 0, opacity: 0, border: 0 }}
       />
 
-      {/* Avatar Group Container - Ensures Layout & Highlight Centering */}
+      {/* Avatar Group Container */}
       <div className="relative flex items-center justify-center w-20 h-20">
 
-        {/* Highlight Effects - Behind Avatar (Z-0) to create outer breathing light */}
-        {isHighlighted && (
-          // Fixed Centered Container for Ripple - Explicit sizes to be circular
-          <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 flex items-center justify-center pointer-events-none z-0 rounded-full"
-            style={{ borderRadius: '50%' }}
-          >
-            {/* Steady Outer Glow - Halo */}
-            <div className="absolute inset-0 rounded-full border-[4px] border-[#FAD089]/50 shadow-[0_0_20px_rgba(250,208,137,0.6)]" style={{ borderRadius: '50%' }} />
-
-            {/* Expanding Breathing Ripple 1 */}
-            <div className="absolute inset-0 rounded-full border-[2px] border-[#FAD089] animate-ripple opacity-80" style={{ borderRadius: '50%' }} />
-
-            {/* Expanding Breathing Ripple 2 (Delayed) */}
-            <div className="absolute inset-0 rounded-full border-[2px] border-[#FAD089] animate-ripple opacity-60" style={{ animationDelay: '0.6s', borderRadius: '50%' }} />
-          </div>
-        )}
+        {/* Highlight Effects */}
+        {isHighlighted && <BreathingHalo />}
 
         {/* Avatar Component - Z-10 to sit ABOVE highlight */}
         <div className="relative z-10 w-full h-full">
@@ -83,9 +85,9 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
         </span>
       </div>
 
-      {/* Detailed Tooltip on Hover (Optional, or simple details) */}
+      {/* Detailed Tooltip on Hover */}
       <div className="absolute top-full mt-2 bg-white/90 backdrop-blur text-slate-700 text-xs p-2 rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 whitespace-nowrap border border-slate-100">
-        <div>{getZodiac(data.dateOfBirth || '')} {getZodiacName(data.dateOfBirth || '')}</div>
+        <div>{zodiac} {zodiacName}</div>
         {data.jobTitle && <div>{data.jobTitle}</div>}
         {isDeceased && <div className="text-slate-500">已故</div>}
       </div>

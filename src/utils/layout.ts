@@ -17,53 +17,49 @@ export const buildGraph = (
   const edges: Edge[] = [];
   const marriageNodes: Record<string, string> = {}; // key: sorted_ids, value: nodeId
 
-  // 1. Process Spouses -> Create Virtual Marriage Nodes
+  // 2. Process Spouses -> Create "Virtual Nodes" for Marriage
+  // Strategy: Instead of directly connecting two spouses, we create a invisible "Virtual Node" between them.
+  // Their children will then connect to this Virtual Node, creating a "T-shape" lineage graph.
   relationships.forEach(r => {
     if (r.type === 'spouse') {
       const ids = [r.sourceMemberId, r.targetMemberId].sort();
       const key = ids.join('_');
 
+      // Create only ONE virtual node per couple
       if (!marriageNodes[key]) {
         const marriageId = `marriage_${key}`;
         marriageNodes[key] = marriageId;
 
-        // Add Virtual Node
+        // Add Virtual Node (Invisible Hub)
         nodes.push({
           id: marriageId,
-          type: 'virtual', // Use custom virtual node
+          type: 'virtual', // Custom node type that renders nothing/dot
           data: { label: '' },
           position: { x: 0, y: 0 },
-          draggable: true // Allow dragging
+          draggable: true
         });
       }
 
-      // Edges from Partners to Marriage Node (Spouse Relationship)
+      // 2b. Connect Spouses to the Virtual Node
       const mId = marriageNodes[key];
-
-      // Determine Left/Right based on sorted IDs or simply use Left->Right logic
-      // Ideally, the left node connects to its Right Handle, and right node to Left Handle.
-      // But Dagre sorting might flip them. 
-      // Simplified: Just use side handles for both.
-
-      // Use sorted IDs to determine left/right position
       const sortedIds = [r.sourceMemberId, r.targetMemberId].sort();
       const [leftSpouseId] = sortedIds;
 
       const edgeIdSpouseA = `edge_${r.sourceMemberId}_${mId}`;
       const edgeIdSpouseB = `edge_${r.targetMemberId}_${mId}`;
 
-      // Helper to determin handle
+      // Helper: Connect Left Spouse from their Right handle, Right Spouse from Left handle
       const getHandle = (nodeId: string) => nodeId === leftSpouseId ? 'right' : 'left';
 
-      // Check if edges already exist to avoid duplicates
+      // Create Edge A (Spouse 1 -> Marriage Node)
       if (!edges.find(e => e.id === edgeIdSpouseA)) {
         edges.push({
           id: edgeIdSpouseA,
           source: r.sourceMemberId,
           target: mId,
-          sourceHandle: getHandle(r.sourceMemberId), // If Left Spouse, connect from Right
-          targetHandle: 't', // Connect to Top/Target handle of Virtual Node
-          type: 'straight', // Force straight line for T-shape
+          sourceHandle: getHandle(r.sourceMemberId),
+          targetHandle: 't', // Connect to "Target" handle of Marriage Node
+          type: 'straight', // Straight lines for clean T-shape
           style: { stroke: '#8D6E63', strokeWidth: 2 }
         });
       }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FamilyAvatar } from '../common/FamilyAvatar';
 import { useReactFlow } from 'reactflow';
 import { Search, X } from 'lucide-react';
 import { useFamilyStore } from '../../store/useFamilyStore';
@@ -79,17 +80,23 @@ export const TreeSearch: React.FC = () => {
                             <li key={member.id}>
                                 <button
                                     onClick={() => handleSelect(member.id)}
-                                    className="w-full text-left px-4 py-3 hover:bg-violet-50 transition-colors flex items-center gap-3"
+                                    className="w-full text-left px-4 py-3 hover:bg-violet-50 transition-colors flex items-center gap-0 relative group"
                                 >
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${member.gender === 'male' ? 'bg-sky-100 text-sky-600' : 'bg-pink-100 text-pink-600'}`}>
-                                        {member.photoUrl ? (
-                                            <img src={member.photoUrl} alt="" className="w-full h-full rounded-full object-cover" />
-                                        ) : (
-                                            <span className="text-xs font-bold">{member.firstName[0]}</span>
-                                        )}
+                                    <div className="shrink-0 relative" style={{ width: '48px', height: '48px' }}>
+                                        <FamilyAvatar
+                                            src={member.photoUrl}
+                                            gender={member.gender}
+                                            isDeceased={!!member.dateOfDeath}
+                                            size="md"
+                                            className="w-full h-full border border-slate-200"
+                                        />
                                     </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-slate-700">{member.firstName}</p>
+                                    <div className="min-w-0 flex-1 ml-[16px]">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-sm font-bold text-slate-700 truncate">
+                                                {member.lastName}{member.firstName}
+                                            </p>
+                                        </div>
                                         <p className="text-xs text-slate-400">
                                             {member.dateOfBirth ? new Date(member.dateOfBirth).getFullYear() : '未知年份'}
                                         </p>
