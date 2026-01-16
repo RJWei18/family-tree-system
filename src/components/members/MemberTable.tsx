@@ -14,7 +14,7 @@ import type { Member } from '../../types';
 import { useFamilyStore } from '../../store/useFamilyStore';
 import { calculateRelationship } from '../../utils/kinship';
 import { calculateAge } from "../../utils/dateHelpers";
-import { getZodiac, getZodiacName, getHoroscope } from "../../utils/zodiac";
+import { getZodiac, getZodiacName, getHoroscope, getZodiacSortIndex } from "../../utils/zodiac";
 import { Edit, Trash2, User, Plus, Crown, Check, Briefcase, ArrowUp, ArrowDown } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -341,9 +341,17 @@ export const MemberTable: React.FC<MemberTableProps> = ({ onEdit, isBatchMode, o
                     }
                 }
             ),
-            columnHelper.display({
+            columnHelper.accessor((row) => getZodiacSortIndex(row.dateOfBirth || ''), {
                 id: 'zodiac',
-                header: '生肖',
+                header: ({ column }) => (
+                    <div className="flex items-center gap-1 cursor-pointer select-none hover:text-slate-900 transition-colors" onClick={column.getToggleSortingHandler()}>
+                        <span>生肖</span>
+                        {{
+                            asc: <ArrowUp size={14} className="text-violet-500" />,
+                            desc: <ArrowDown size={14} className="text-violet-500" />,
+                        }[column.getIsSorted() as string] ?? <div className="w-[14px]" />}
+                    </div>
+                ),
                 cell: (info) => {
                     const date = info.row.original.dateOfBirth || '';
                     const z = getZodiac(date);
@@ -352,7 +360,8 @@ export const MemberTable: React.FC<MemberTableProps> = ({ onEdit, isBatchMode, o
                         <span className="text-lg" role="img" aria-label="zodiac">{z}</span>
                         <span>{n || '-'}</span>
                     </span>;
-                }
+                },
+                sortingFn: 'basic'
             }),
             columnHelper.accessor((row) => {
                 const h = getHoroscope(row.dateOfBirth || '');

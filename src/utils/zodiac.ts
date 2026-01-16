@@ -21,6 +21,18 @@ export const getZodiacName = (dateString: string): string => {
   return animals[year % 12];
 };
 
+// Returns sort index: Rat (0) -> Pig (11)
+export const getZodiacSortIndex = (dateString: string): number => {
+  if (!dateString) return -1;
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return -1;
+  const year = date.getFullYear();
+  // year % 12 maps to: 0=Monkey, 4=Rat
+  // We want Rat to be 0
+  // (year % 12 + 8) % 12 maps 4(Rat) -> (4+8)%12 = 0
+  return (year % 12 + 8) % 12;
+};
+
 export interface Horoscope {
   name: string;
   icon: string;
