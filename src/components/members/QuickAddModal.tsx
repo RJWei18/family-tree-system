@@ -19,7 +19,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
     onAdd
 }) => {
     const [mode, setMode] = useState<'create' | 'link'>('create');
-    const [fullName, setFullName] = useState('');
+
     const [lastName, setLastName] = useState(sourceMember?.lastName || '');
     const [firstName, setFirstName] = useState('');
     const [gender, setGender] = useState<Gender>('male');
@@ -67,7 +67,7 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
             setSelectedExistingId('');
             setMode('create');
         }
-        setFullName('');
+
         setLastName('');
         setFirstName('');
         setGender('male');
