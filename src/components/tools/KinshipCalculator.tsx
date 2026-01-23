@@ -46,10 +46,10 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
             />
 
             {/* The Card */}
-            <div className="bg-[#FFFBF0] rounded-[32px] shadow-2xl p-8 w-full max-w-sm pointer-events-auto relative animate-in zoom-in-95 duration-200 shadow-[#5D4037]/10">
+            <div className="bg-[#FFFBF0] rounded-[32px] shadow-2xl p-6 w-[90%] max-w-[500px] pointer-events-auto relative animate-in zoom-in-95 duration-200 shadow-[#5D4037]/10">
                 <button
                     onClick={onClose}
-                    className="absolute top-6 right-6 p-2 rounded-full hover:bg-[#FAD089]/20 text-[#8D6E63] hover:text-[#5D4037] transition-colors"
+                    className="absolute top-5 right-5 p-2 rounded-full hover:bg-[#FAD089]/20 text-[#8D6E63] hover:text-[#5D4037] transition-colors"
                 >
                     <X size={24} />
                 </button>

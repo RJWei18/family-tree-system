@@ -121,10 +121,10 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
                 onClick={onClose}
             />
 
-            <div className="bg-[#FFFBF0] p-8 rounded-[32px] w-full max-w-sm shadow-2xl relative z-10 animate-in zoom-in-95 duration-200 shadow-[#5D4037]/10">
+            <div className="bg-[#FFFBF0] p-6 rounded-[32px] w-[90%] max-w-[500px] shadow-2xl relative z-10 animate-in zoom-in-95 duration-200 shadow-[#5D4037]/10">
                 <button
                     onClick={onClose}
-                    className="absolute top-6 right-6 text-[#8D6E63] hover:text-[#5D4037] p-2 hover:bg-[#FAD089]/20 rounded-full transition-colors"
+                    className="absolute top-5 right-5 text-[#8D6E63] hover:text-[#5D4037] p-2 hover:bg-[#FAD089]/20 rounded-full transition-colors"
                 >
                     <X size={24} />
                 </button>
