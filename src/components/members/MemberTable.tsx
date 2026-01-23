@@ -209,7 +209,7 @@ export const MemberTable: React.FC<MemberTableProps> = ({ onEdit, isBatchMode, o
                     if (isBatchMode && onBatchUpdate) {
                         return (
                             <input
-                                className="bg-white border border-slate-200 rounded px-2 py-1 w-full text-sm text-slate-800 focus:border-primary focus:outline-none"
+                                className="bg-white border border-slate-200 rounded px-2 py-1 w-full min-w-[120px] text-sm text-slate-800 focus:border-primary focus:outline-none"
                                 value={info.row.original.firstName}
                                 placeholder="姓名"
                                 onChange={(e) => {
@@ -229,7 +229,7 @@ export const MemberTable: React.FC<MemberTableProps> = ({ onEdit, isBatchMode, o
                 cell: info => {
                     const gen = generationMap[info.getValue()];
                     return (
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 min-w-[60px]">
                             {gen ? (
                                 <span className={`
                                     px-2 py-0.5 rounded-full text-xs font-bold

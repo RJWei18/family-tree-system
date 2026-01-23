@@ -38,34 +38,38 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
             className="fixed inset-0 z-[100000] flex items-center justify-center p-4"
             style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
         >
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose} />
+            {/* Modal Overlay */}
+            <div
+                className="absolute inset-0 backdrop-blur-md animate-in fade-in duration-200"
+                style={{ backgroundColor: 'rgba(93, 64, 55, 0.2)' }}
+                onClick={onClose}
+            />
 
             {/* The Card */}
-            <div className="bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 rounded-2xl shadow-2xl p-6 w-full max-w-sm pointer-events-auto relative animate-in zoom-in-95 duration-200" style={{ backgroundColor: 'var(--bg-card)' }}>
+            <div className="bg-[#FFFBF0] rounded-[32px] shadow-2xl p-8 w-full max-w-sm pointer-events-auto relative animate-in zoom-in-95 duration-200 shadow-[#5D4037]/10">
                 <button
                     onClick={onClose}
-                    className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                    className="absolute top-6 right-6 p-2 rounded-full hover:bg-[#FAD089]/20 text-[#8D6E63] hover:text-[#5D4037] transition-colors"
                 >
-                    <X size={20} />
+                    <X size={24} />
                 </button>
 
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="p-2.5 bg-violet-100 text-violet-600 rounded-lg">
-                        <Calculator size={24} />
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="p-3 bg-[#FAD089]/20 text-[#5D4037] rounded-2xl">
+                        <Calculator size={28} />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">稱謂計算機</h2>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">計算兩位成員之間的親戚關係</p>
+                        <h2 className="text-2xl font-bold text-[#5D4037]">稱謂計算機</h2>
+                        <p className="text-sm text-[#8D6E63] font-medium mt-1">計算兩位成員之間的親戚關係</p>
                     </div>
                 </div>
 
                 <div className="space-y-6">
                     {/* Person A */}
-                    <div>
-                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">出發點 (我是...)</label>
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-[#8D6E63] uppercase tracking-wider ml-1">出發點 (我是...)</label>
                         <select
-                            className="input-field w-full py-2.5 bg-slate-50 border-slate-200 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100"
+                            className="w-full bg-white border-2 border-transparent focus:border-[#FAD089] text-[#5D4037] font-bold text-base py-3 px-4 rounded-xl outline-none transition-all shadow-sm appearance-none cursor-pointer hover:bg-white/80"
                             value={personA}
                             onChange={(e) => setPersonA(e.target.value)}
                         >
@@ -78,21 +82,21 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
                         </select>
                     </div>
 
-                    <div className="flex justify-center -my-2">
+                    <div className="flex justify-center -my-3 z-10 relative">
                         <button
                             onClick={handleSwap}
-                            className="p-1.5 rounded-full bg-slate-100 text-slate-500 hover:bg-violet-50 hover:text-violet-600 transition-colors border border-slate-200 hover:border-violet-200 dark:bg-slate-700 dark:text-slate-400 dark:border-slate-600 dark:hover:bg-slate-600 dark:hover:text-violet-300"
+                            className="p-2.5 rounded-full bg-[#FFFBF0] text-[#8D6E63] hover:text-[#5D4037] hover:bg-[#FAD089]/20 transition-all border-2 border-[#EFEBE9] hover:border-[#FAD089] shadow-sm transform hover:rotate-180 duration-300"
                             title="交換位置"
                         >
-                            <ArrowRightLeft size={16} />
+                            <ArrowRightLeft size={20} />
                         </button>
                     </div>
 
                     {/* Person B */}
-                    <div>
-                        <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">對象 (他是我的...)</label>
+                    <div className="space-y-2">
+                        <label className="block text-xs font-bold text-[#8D6E63] uppercase tracking-wider ml-1">對象 (他是我的...)</label>
                         <select
-                            className="input-field w-full py-2.5 bg-slate-50 border-slate-200 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100"
+                            className="w-full bg-white border-2 border-transparent focus:border-[#FAD089] text-[#5D4037] font-bold text-base py-3 px-4 rounded-xl outline-none transition-all shadow-sm appearance-none cursor-pointer hover:bg-white/80"
                             value={personB}
                             onChange={(e) => setPersonB(e.target.value)}
                         >
@@ -105,18 +109,30 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
                         </select>
                     </div>
 
-                    {/* Result */}
+                    {/* Result with Ribbon Style */}
                     {result && (
-                        <div className="bg-violet-50 border border-violet-100 rounded-xl p-4 text-center animate-in fade-in slide-in-from-top-2">
-                            <span className="text-slate-500 text-sm block mb-1">關係稱謂</span>
-                            <span className="text-2xl font-bold text-violet-700">{result}</span>
+                        <div className="flex flex-col items-center animate-in fade-in slide-in-from-top-2 pt-2">
+                            <span className="text-[#8D6E63] text-xs font-bold mb-2 uppercase tracking-wide">計算結果</span>
+                            <div className="relative">
+                                {/* Ribbon Tail Left */}
+                                <div className="absolute top-2 -left-3 border-r-[12px] border-r-[#FBC02D] border-t-[12px] border-t-transparent border-b-[12px] border-b-transparent transform rotate-180 brightness-75"></div>
+                                {/* Ribbon Tail Right */}
+                                <div className="absolute top-2 -right-3 border-l-[12px] border-l-[#FBC02D] border-t-[12px] border-t-transparent border-b-[12px] border-b-transparent transform rotate-180 brightness-75"></div>
+
+                                {/* Main Ribbon Body */}
+                                <div className="bg-gradient-to-r from-[#FAD089] to-[#FFCC80] text-[#5D4037] px-8 py-3 rounded-lg shadow-lg transform -skew-x-6 relative z-10 border-b-4 border-[#FFA000]/20">
+                                    <span className="text-2xl font-bold block transform skew-x-6 leading-none">
+                                        {result}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     )}
 
                     <button
                         onClick={handleCalculate}
                         disabled={!personA || !personB}
-                        className="w-full btn btn-primary py-3 text-lg shadow-lg shadow-violet-200 disabled:opacity-50 disabled:shadow-none"
+                        className="w-full py-4 rounded-2xl font-bold text-[#5D4037] text-lg shadow-lg active:scale-95 transition-all mt-4 bg-gradient-to-r from-[#FAD089] to-[#FFCC80] hover:from-[#FFCA28] hover:to-[#FFA726] shadow-[#FAD089]/30 border border-[#FFE082] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                     >
                         開始計算
                     </button>

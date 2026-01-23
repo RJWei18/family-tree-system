@@ -6,6 +6,8 @@ import { calculateAge } from '../../utils/dateHelpers';
 import { getZodiac, getZodiacName, getHoroscope } from '../../utils/zodiac';
 import { FamilyAvatar } from '../common/FamilyAvatar';
 import { BreathingHalo } from './BreathingHalo';
+import { Plus } from 'lucide-react';
+import { useUIStore } from '../../store/useUIStore';
 
 interface CustomNodeProps {
   data: Member;
@@ -17,6 +19,7 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
   // Performance Optimization: Granular Selector
   // Only re-render if THIS node's highlight status changes
   const isHighlighted = useFamilyStore((state) => state.highlightedMemberId === data.id);
+  const openQuickAdd = useUIStore((state) => state.openQuickAdd);
 
   const age = useMemo(() => {
     const ageStr = calculateAge(data.dateOfBirth, data.dateOfDeath);
@@ -61,6 +64,18 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
 
       {/* Avatar Group Container */}
       <div className="relative flex items-center justify-center w-20 h-20">
+
+        {/* Quick Add Trigger - Visible on Group Hover */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            openQuickAdd(data.id);
+          }}
+          className="absolute -top-3 -right-3 z-30 bg-violet-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 shadow-lg"
+          title="新增家庭成員"
+        >
+          <Plus size={14} strokeWidth={3} />
+        </button>
 
         {/* Highlight Effects */}
         {isHighlighted && <BreathingHalo />}
