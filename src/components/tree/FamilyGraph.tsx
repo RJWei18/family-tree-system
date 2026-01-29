@@ -4,6 +4,8 @@ import 'reactflow/dist/style.css';
 import { useFamilyStore } from '../../store/useFamilyStore';
 import { CustomNode } from './CustomNode';
 import { VirtualNode } from './VirtualNode';
+import { FamilyGroupNode } from './FamilyGroupNode';
+import { HeartAnchorNode } from './HeartAnchorNode';
 import { buildGraph, getLayoutedElements } from '../../utils/layout';
 import { TreeSearch } from './TreeSearch';
 import { ExportButton } from './ExportButton';
@@ -19,7 +21,9 @@ const FamilyGraphContent: React.FC = () => {
 
     const nodeTypes = useMemo(() => ({
         custom: CustomNode,
-        virtual: VirtualNode
+        virtual: VirtualNode,
+        FamilyGroup: FamilyGroupNode,
+        heart: HeartAnchorNode
     }), []);
 
     const onLayout = useCallback(() => {
@@ -41,10 +45,78 @@ const FamilyGraphContent: React.FC = () => {
 
     useEffect(() => {
         // Only run layout if we have members
-        if (Object.keys(members).length > 0) {
-            onLayout();
-        }
+        // Debounce slightly to prevent flicker on rapid updates
+        const timer = setTimeout(() => {
+            if (Object.keys(members).length > 0) {
+                onLayout();
+            }
+        }, 50);
+        return () => clearTimeout(timer);
     }, [onLayout, members]);
+
+    const onNodeDrag = useCallback((_event: React.MouseEvent, node: any) => {
+        // Dynamic Heart Centering & Axis Locking Logic
+        // 1. Check if dragged node is a Member and has a parent (FamilyGroup)
+        if (node.type === 'custom' && node.parentNode) {
+            setNodes((nds) => {
+                // Find relationships in the current state
+                const groupMembers = nds.filter(n => n.parentNode === node.parentNode && n.type === 'custom');
+                const heartNode = nds.find(n => n.parentNode === node.parentNode && n.type === 'heart');
+
+                if (groupMembers.length === 2 && heartNode) {
+                    const otherSpouse = groupMembers.find(n => n.id !== node.id);
+                    if (!otherSpouse) return nds;
+
+                    // STRICT Y-AXIS LOCKING:
+                    const lockedY = 50;
+
+                    // Force the dragged node's internal position in state (Pseudo-constraint)
+                    if (node.position.y !== lockedY) {
+                        node.position.y = lockedY;
+                    }
+
+                    // Calculate Heart Metrics
+                    // Use the latest interactive X from 'node' (the dragged one)
+                    const draggedX = node.position.x;
+                    const otherX = otherSpouse.position.x;
+
+                    // CONSTANTS derived from layout
+                    const MEMBER_WIDTH = 120; // 120px matches .family-node-container width
+                    const HEART_WIDTH = 32;   // w-8 = 32px
+
+                    // Geometric Center Calculation (User Requested):
+                    // Formula: (x1 + x2)/2 + (MEMBER_WIDTH - HEART_WIDTH)/2
+                    const midX = (draggedX + otherX) / 2 + (MEMBER_WIDTH - HEART_WIDTH) / 2;
+
+                    // Heart Y alignment (ABSOLUTE LOCK):
+                    // Handle Absolute Y = 50 + 40 = 90.
+                    // Heart Center Y = 90.
+                    // Heart Node Top-Left = Center Y - 16 = 90 - 16 = 74.
+                    const fixedHeartY = 74;
+
+                    return nds.map(n => {
+                        // Synchronous Heart Position Update
+                        if (n.id === heartNode.id) {
+                            return {
+                                ...n,
+                                position: { x: midX, y: fixedHeartY },
+                                draggable: false // Ensure heart is static
+                            };
+                        }
+                        // Enforce Dragged Node Y-Lock
+                        if (n.id === node.id) {
+                            return {
+                                ...n,
+                                position: { ...n.position, y: lockedY }
+                            };
+                        }
+                        return n;
+                    });
+                }
+                return nds;
+            });
+        }
+    }, [setNodes]);
 
     return (
         <div className="w-full h-full flex-1 relative bg-[#F9F4E8] dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
@@ -64,6 +136,7 @@ const FamilyGraphContent: React.FC = () => {
                 edges={edges}
                 onNodesChange={onNodesChange}
                 onEdgesChange={onEdgesChange}
+                onNodeDrag={onNodeDrag} // Add Drag Handler
                 nodeTypes={nodeTypes}
                 fitView
                 minZoom={0.1}
@@ -71,7 +144,7 @@ const FamilyGraphContent: React.FC = () => {
                 nodesConnectable={false}
                 nodesDraggable={true}
                 snapToGrid={true}
-                snapGrid={[20, 20]}
+                snapGrid={[10, 10]} // Finer grid for smoother drag
                 defaultEdgeOptions={{
                     type: 'smoothstep',
                     animated: false,

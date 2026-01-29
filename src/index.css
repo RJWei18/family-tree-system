@@ -112,20 +112,25 @@ body.app-fixed-height #root {
 /* Custom Ripple Animation - Starts clearly OUTSIDE the avatar (scale 1.2) */
 @keyframes ripple {
   0% {
-    transform: scale(1.2);
-    opacity: 1;
-    box-shadow: 0 0 0 0 rgba(250, 208, 137, 1);
+    transform: scale(1.0);
+    opacity: 0.8;
+    box-shadow: 0 0 0 0 rgba(251, 192, 45, 0.7);
+  }
+
+  70% {
+    transform: scale(1.15);
+    opacity: 0;
+    box-shadow: 0 0 0 15px rgba(251, 192, 45, 0);
   }
 
   100% {
-    transform: scale(3.0);
+    transform: scale(1.0);
     opacity: 0;
-    box-shadow: 0 0 0 30px rgba(250, 208, 137, 0);
   }
 }
 
 .animate-ripple {
-  animation: ripple 2.5s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+  animation: ripple 2s infinite;
 }
 
 .input-field {

@@ -40,13 +40,13 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
         >
             {/* Modal Overlay */}
             <div
-                className="absolute inset-0 backdrop-blur-md animate-in fade-in duration-200"
-                style={{ backgroundColor: 'rgba(93, 64, 55, 0.2)' }}
+                className="absolute inset-0 animate-in fade-in duration-200"
+                style={{ backgroundColor: 'rgba(141, 110, 99, 0.4)', backdropFilter: 'blur(4px)' }}
                 onClick={onClose}
             />
 
             {/* The Card */}
-            <div className="bg-[#FFFBF0] rounded-[32px] shadow-2xl p-6 w-[90%] max-w-[500px] pointer-events-auto relative animate-in zoom-in-95 duration-200 shadow-[#5D4037]/10">
+            <div className="bg-[#FFFBF0] rounded-[20px] shadow-2xl p-6 w-[90%] max-w-[500px] pointer-events-auto relative animate-in zoom-in-95 duration-200 shadow-[#5D4037]/10 border-0">
                 <button
                     onClick={onClose}
                     className="absolute top-5 right-5 p-2 rounded-full hover:bg-[#FAD089]/20 text-[#8D6E63] hover:text-[#5D4037] transition-colors"

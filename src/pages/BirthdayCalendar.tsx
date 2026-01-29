@@ -60,7 +60,7 @@ export const BirthdayCalendar: React.FC = () => {
     const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
 
     return (
-        <div className="flex flex-col md:flex-row w-full gap-4 py-6 px-[40px] max-w-[1200px] mx-auto box-border">
+        <div className="flex flex-col md:flex-row w-full gap-4 py-6 px-[40px] max-w-[1200px] mx-auto box-border" style={{ overflowAnchor: 'none' }}>
 
             {/* Sidebar: Monthly Summary */}
             <aside className="w-full md:w-72 shrink-0 flex flex-col gap-4">
@@ -77,7 +77,7 @@ export const BirthdayCalendar: React.FC = () => {
                             monthlyBirthdays.map(({ member, day, age }) => (
                                 <div key={member.id} className="flex items-center gap-3 p-4 rounded-xl bg-white border border-slate-100 shadow-sm shrink-0">
                                     {/* Fixed Width Date Column */}
-                                    <div className="w-[36px] shrink-0 text-center">
+                                    <div className="w-[45px] min-w-[45px] shrink-0 text-center whitespace-nowrap">
                                         <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-0.5">DATE</div>
                                         <div className="text-xl font-black text-[#FAD089] leading-none drop-shadow-sm filter">
                                             {day}

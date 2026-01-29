@@ -5,7 +5,6 @@ import { useFamilyStore } from '../../store/useFamilyStore';
 import { calculateAge } from '../../utils/dateHelpers';
 import { getZodiac, getZodiacName, getHoroscope } from '../../utils/zodiac';
 import { FamilyAvatar } from '../common/FamilyAvatar';
-import { BreathingHalo } from './BreathingHalo';
 import { Plus } from 'lucide-react';
 import { useUIStore } from '../../store/useUIStore';
 
@@ -13,7 +12,7 @@ interface CustomNodeProps {
   data: Member;
 }
 
-const HANDLE_OFFSET = '38px'; // Centralized handle positioning
+// HANDLE_OFFSET removed as we are using 50% alignment now
 
 export const CustomNode = memo(({ data }: CustomNodeProps) => {
   // Performance Optimization: Granular Selector
@@ -34,27 +33,28 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
   return (
     <div className={`family-node-container ${isDeceased ? 'node-deceased' : ''} group relative`}>
       {/* Handles - Essential for Edges to connect */}
-      {/* Top/Bottom for Parent-Child */}
-      <Handle type="target" position={Position.Top} className="!w-1 !h-1 !bg-transparent !border-none" />
-      <Handle type="source" position={Position.Bottom} className="!w-1 !h-1 !bg-transparent !border-none" />
+      {/* Handles - Essential for Edges to connect */}
+      {/* Top/Bottom for Parent-Child Relationship ONLY - Keep as is */}
+      <Handle type="target" position={Position.Top} id="top" className="!w-1 !h-1 !bg-transparent !border-none" />
+      <Handle type="source" position={Position.Bottom} id="bottom" className="!w-1 !h-1 !bg-transparent !border-none" />
 
-      {/* Left/Right for Spouse Connections - Aligned with Avatar Center */}
+      {/* Left/Right for Spouse Connections - FORCED TO 50% CENTER */}
       <Handle
-        type="source"
+        type="target"
         position={Position.Left}
         id="left"
         className="!w-1 !h-1 !bg-transparent !border-none"
-        style={{ top: HANDLE_OFFSET }}
+        style={{ top: '40px' }}
       />
       <Handle
         type="source"
         position={Position.Right}
         id="right"
         className="!w-1 !h-1 !bg-transparent !border-none"
-        style={{ top: HANDLE_OFFSET }}
+        style={{ top: '40px' }}
       />
 
-      {/* Center Handle for complex routing */}
+      {/* Center Handle - Keeping as potential fallback/complex routing point */}
       <Handle
         type="source"
         position={Position.Bottom}
@@ -77,26 +77,50 @@ export const CustomNode = memo(({ data }: CustomNodeProps) => {
           <Plus size={14} strokeWidth={3} />
         </button>
 
-        {/* Highlight Effects */}
-        {isHighlighted && <BreathingHalo />}
+        {/* Highlight Pulse - Gold Pulse Animation */}
+        {isHighlighted && (
+          <div className="absolute inset-0 rounded-full z-0 animate-ping bg-amber-400 opacity-75 duration-1000" />
+        )}
+        {/* Helper ring for persistent highlight */}
+        {isHighlighted && (
+          <div className="absolute -inset-1 rounded-full z-0 border-2 border-amber-400 opacity-80" />
+        )}
 
         {/* Avatar Component - Z-10 to sit ABOVE highlight */}
-        <div className="relative z-10 w-full h-full">
+        <div className={`relative z-10 w-full h-full ${isDeceased ? 'grayscale opacity-60' : ''}`}>
+          {/* Deceased: Dashed Border & Memorial Icon */}
+          {isDeceased && (
+            <>
+              {/* Dashed Border Overlay - Fine dashed as requested */}
+              <div
+                className="absolute inset-0 rounded-full z-20 pointer-events-none"
+                style={{ border: '2px dashed #a8a29e' }} // Stone-400 for better visibility in grayscale
+              />
+              {/* Memorial Icon (White Ribbon / Candle) */}
+              <div className="absolute -top-1 -right-1 z-30 drop-shadow-md">
+                <span className="text-sm filter drop-shadow">🕯️</span>
+              </div>
+            </>
+          )}
+
           <FamilyAvatar
             src={data.photoUrl}
             gender={data.gender}
             isDeceased={isDeceased}
             size="lg" // 80px
-            className="shadow-sm transition-transform duration-300 hover:scale-105"
+            className={`shadow-sm transition-transform duration-300 ${isDeceased ? '' : 'hover:scale-105'}`}
           />
         </div>
       </div>
 
       {/* Name Ribbon */}
-      <div className="name-ribbon flex flex-col items-center">
-        <span className="text-sm font-bold leading-none">{data.firstName}</span>
+      <div className={`name-ribbon flex flex-col items-center ${isDeceased ? '!bg-stone-200 !text-stone-600' : ''}`}>
+        <span className="text-sm font-bold leading-none flex items-center gap-0.5">
+          {isDeceased && <span className="text-[10px] opacity-70">†</span>}
+          {data.firstName}
+        </span>
         <span className="text-[10px] opacity-80 mt-0.5 font-normal flex items-center gap-1">
-          <span>{age}</span>
+          <span>{isDeceased ? '(殁)' : ''} {age}</span>
           {zodiac && <span>{zodiac}</span>}
           {horoscope && <span title={horoscope.name}>{horoscope.icon}</span>}
         </span>

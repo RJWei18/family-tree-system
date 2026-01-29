@@ -115,13 +115,13 @@ export const QuickAddModal: React.FC<QuickAddModalProps> = ({
                 style={{
                     position: 'absolute',
                     inset: 0,
-                    backgroundColor: 'rgba(93, 64, 55, 0.2)', // Warm brown transparent
-                    backdropFilter: 'blur(8px)' // Stronger glass effect
+                    backgroundColor: 'rgba(141, 110, 99, 0.4)',
+                    backdropFilter: 'blur(4px)'
                 }}
                 onClick={onClose}
             />
 
-            <div className="bg-[#FFFBF0] p-6 rounded-[32px] w-[90%] max-w-[500px] shadow-2xl relative z-10 animate-in zoom-in-95 duration-200 shadow-[#5D4037]/10">
+            <div className="bg-[#FFFBF0] p-6 rounded-[20px] w-[90%] max-w-[500px] shadow-2xl relative z-10 animate-in zoom-in-95 duration-200 shadow-[#5D4037]/10 mx-auto">
                 <button
                     onClick={onClose}
                     className="absolute top-5 right-5 text-[#8D6E63] hover:text-[#5D4037] p-2 hover:bg-[#FAD089]/20 rounded-full transition-colors"
