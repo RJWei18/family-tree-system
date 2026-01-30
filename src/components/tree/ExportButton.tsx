@@ -19,45 +19,63 @@ export const ExportButton: React.FC = () => {
     const { getNodes } = useReactFlow();
     const [isDownloading, setIsDownloading] = useState(false);
 
-    const onClick = () => {
+    const onClick = async () => {
         setIsDownloading(true);
-        const viewport = document.querySelector('.react-flow__viewport') as HTMLElement;
-
-        if (!viewport) {
-            console.error('Viewport not found');
-            setIsDownloading(false);
-            return;
-        }
-
-        const nodes = getNodes();
-        if (nodes.length === 0) {
-            setIsDownloading(false);
-            return;
-        }
-
-        const nodesBounds = getRectOfNodes(nodes);
-        const padding = 50;
-        const width = nodesBounds.width + padding * 2;
-        const height = nodesBounds.height + padding * 2;
-
-        const transform = getTransformForBounds(nodesBounds, width, height, 0.5, 2);
-
-        toPng(viewport, {
-            backgroundColor: '#ffffff', // Use plain white for better export
-            width: width,
-            height: height,
-            style: {
-                width: String(width),
-                height: String(height),
-                transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
-            },
-        }).then(downloadImage)
-            .catch((err) => {
-                console.error('Export failed', err);
-            })
-            .finally(() => {
+        try {
+            // 1. Selector Check
+            const viewport = document.querySelector('.react-flow__viewport') as HTMLElement;
+            if (!viewport) {
+                console.error('Viewport not found');
+                alert('匯出失敗：找不到畫布元件，請重新整理頁面再試一次。');
                 setIsDownloading(false);
+                return;
+            }
+
+            // 2. Nodes Check
+            const nodes = getNodes();
+            if (nodes.length === 0) {
+                alert('目前沒有家族成員可供匯出。');
+                setIsDownloading(false);
+                return;
+            }
+
+            // 3. Calculate Bounds
+            const nodesBounds = getRectOfNodes(nodes);
+            const padding = 50;
+            const width = nodesBounds.width + padding * 2;
+            const height = nodesBounds.height + padding * 2;
+            const transform = getTransformForBounds(nodesBounds, width, height, 0.5, 2);
+
+            // 4. Generate Image
+            const dataUrl = await toPng(viewport, {
+                backgroundColor: '#ffffff',
+                width: width,
+                height: height,
+                style: {
+                    width: String(width),
+                    height: String(height),
+                    transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
+                },
+                pixelRatio: 2, // Better quality
+                cacheBust: true, // Prevent CORS caching issues
+                filter: (node) => {
+                    const classList = node.classList;
+                    if (!classList) return true;
+                    // Exclude UI elements just in case
+                    return !classList.contains('react-flow__minimap') &&
+                        !classList.contains('react-flow__controls') &&
+                        !classList.contains('react-flow__panel');
+                }
             });
+
+            downloadImage(dataUrl);
+
+        } catch (err: any) {
+            console.error('Export failed', err);
+            alert('匯出圖片發生錯誤：' + (err.message || '未知原因'));
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
     return (
