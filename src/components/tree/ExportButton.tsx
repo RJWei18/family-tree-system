@@ -15,6 +15,9 @@ function downloadImage(dataUrl: string) {
 
 
 
+// Simple gray placeholder for broken images
+const PLACEHOLDER_IMAGE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+
 export const ExportButton: React.FC = () => {
     const { getNodes } = useReactFlow();
     const [isDownloading, setIsDownloading] = useState(false);
@@ -57,6 +60,7 @@ export const ExportButton: React.FC = () => {
                     transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
                 },
                 pixelRatio: 1.5, // Balanced quality
+                imagePlaceholder: PLACEHOLDER_IMAGE, // Fallback for CORS images
                 filter: (node: HTMLElement) => {
                     // Safe access to classList
                     const classList = node.classList;
