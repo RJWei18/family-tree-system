@@ -47,7 +47,7 @@ export const ExportButton: React.FC = () => {
             const transform = getTransformForBounds(nodesBounds, width, height, 0.5, 2);
 
             // 4. Generate Image
-            const dataUrl = await toPng(viewport, {
+            const options = {
                 backgroundColor: '#ffffff',
                 width: width,
                 height: height,
@@ -56,9 +56,9 @@ export const ExportButton: React.FC = () => {
                     height: String(height),
                     transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
                 },
-                pixelRatio: 2, // Better quality
-                cacheBust: true, // Prevent CORS caching issues
-                filter: (node) => {
+                pixelRatio: 1.5, // Balanced quality
+                filter: (node: HTMLElement) => {
+                    // Safe access to classList
                     const classList = node.classList;
                     if (!classList) return true;
                     // Exclude UI elements just in case
@@ -66,13 +66,37 @@ export const ExportButton: React.FC = () => {
                         !classList.contains('react-flow__controls') &&
                         !classList.contains('react-flow__panel');
                 }
-            });
+            };
 
-            downloadImage(dataUrl);
+            try {
+                const dataUrl = await toPng(viewport, options);
+                downloadImage(dataUrl);
+            } catch (firstErr) {
+                console.warn('First export attempt failed, retrying with simplified options...', firstErr);
+                // Retry with simplified options
+                try {
+                    const dataUrl = await toPng(viewport, {
+                        ...options,
+                        pixelRatio: 1,
+                        skipFonts: true,
+                    });
+                    downloadImage(dataUrl);
+                } catch (retryErr: any) {
+                    console.error('Retry export failed', retryErr);
+                    // Extract detailed error info
+                    const errorMessage = retryErr.message || (retryErr instanceof Event ? 'Network/CORS Error' : 'Unknown Error');
+
+                    // Specific hints for common issues
+                    let hint = '可能原因：圖片跨域問題或瀏覽器限制。';
+                    if (errorMessage.includes('Failed to fetch')) hint = '可能原因：圖片載入失敗 (CORS)。';
+
+                    alert(`匯出失敗 (重試後仍失敗)：${errorMessage}\n\n${hint}`);
+                }
+            }
 
         } catch (err: any) {
-            console.error('Export failed', err);
-            alert('匯出圖片發生錯誤：' + (err.message || '未知原因'));
+            console.error('Export setup failed', err);
+            alert('匯出設定發生錯誤：' + (err.message || '未知原因'));
         } finally {
             setIsDownloading(false);
         }
