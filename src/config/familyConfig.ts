@@ -13,6 +13,8 @@ export interface FamilyAppConfig {
   contactPrompt: string;
   // 密碼長度規則 (預設 8 碼)
   pinLength: number;
+  // 預設首頁人物名稱
+  homeMemberName: string;
 }
 
 export const familyConfig: FamilyAppConfig = {
@@ -25,4 +27,5 @@ export const familyConfig: FamilyAppConfig = {
   title: import.meta.env.VITE_FAMILY_TITLE || '🌳 數位家族樹系統',
   contactPrompt: import.meta.env.VITE_ADMIN_CONTACT || '若忘記 PIN 碼，請聯繫家族管理員取得解鎖金鑰。',
   pinLength: 8,
+  homeMemberName: import.meta.env.VITE_HOME_MEMBER_NAME || '魏子傑',
 };

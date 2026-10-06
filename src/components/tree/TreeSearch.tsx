@@ -4,7 +4,11 @@ import { useReactFlow } from 'reactflow';
 import { Search, X } from 'lucide-react';
 import { useFamilyStore } from '../../store/useFamilyStore';
 
-export const TreeSearch: React.FC = () => {
+interface TreeSearchProps {
+    onPick?: (memberId: string) => void;
+}
+
+export const TreeSearch: React.FC<TreeSearchProps> = ({ onPick }) => {
     const [query, setQuery] = useState('');
     const [isOpen, setIsOpen] = useState(false);
     const members = useFamilyStore(s => s.members);
@@ -32,6 +36,9 @@ export const TreeSearch: React.FC = () => {
             maxZoom: 1.5
         });
 
+        if (onPick) {
+            onPick(memberId);
+        }
         setIsOpen(false);
         setQuery('');
     };
