@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Users, Network, Menu, X, Calendar, Moon, Sun } from 'lucide-react';
+import { Users, Network, Menu, X, Calendar, Moon, Sun, RefreshCw, Lock } from 'lucide-react';
 import { useFamilyStore } from '../../store/useFamilyStore';
 
 interface MainLayoutProps {
@@ -8,9 +8,22 @@ interface MainLayoutProps {
   currentView: 'members' | 'tree' | 'calendar';
   onViewChange: (view: 'members' | 'tree' | 'calendar') => void;
   onToggleCalculator: () => void;
+  onManualSync?: () => void;
+  onLock?: () => void;
+  isSyncing?: boolean;
+  lastSyncTime?: Date | null;
 }
 
-export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, onViewChange, onToggleCalculator }) => {
+export const MainLayout: React.FC<MainLayoutProps> = ({
+  children,
+  currentView,
+  onViewChange,
+  onToggleCalculator,
+  onManualSync,
+  onLock,
+  isSyncing = false,
+  lastSyncTime = null
+}) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const isDarkMode = useFamilyStore((state) => state.isDarkMode);
@@ -65,7 +78,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
         style={{
           position: 'absolute',
           inset: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.4)', // Lighter backdrop
+          backgroundColor: 'rgba(0, 0, 0, 0.4)',
           backdropFilter: 'blur(4px)'
         }}
         onClick={() => setIsMobileMenuOpen(false)}
@@ -78,7 +91,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
           width: '85%',
           maxWidth: '320px',
           height: '100%',
-          backgroundColor: '#ffffff', // White bg
+          backgroundColor: '#ffffff',
           borderRight: '1px solid #e2e8f0',
           display: 'flex',
           flexDirection: 'column',
@@ -97,46 +110,78 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
 
         <nav className="flex flex-col gap-3 p-4">
           <button
-            onClick={() => handleNavClick('members')}
-            className={`flex items-center gap-4 p-4 rounded-xl text-lg font-medium transition-all ${currentView === 'members'
-              ? 'bg-[var(--accent)] text-[#5D4037]'
-              : 'hover:bg-slate-50 text-[var(--text-muted)]'
-              }`}
-          >
-            <Users size={24} className="shrink-0" />
-            <span className="truncate">成員管理</span>
-          </button>
-          <button
             onClick={() => handleNavClick('tree')}
-            className={`flex items-center gap-4 p-4 rounded-xl text-lg font-medium transition-all ${currentView === 'tree'
-              ? 'bg-[var(--accent)] text-[#5D4037]'
-              : 'hover:bg-slate-50 text-[var(--text-muted)]'
-              }`}
+            className={`flex items-center gap-4 p-4 rounded-xl text-lg font-medium transition-all ${
+              currentView === 'tree'
+                ? 'bg-[var(--accent)] text-[#5D4037]'
+                : 'hover:bg-slate-50 text-[var(--text-muted)]'
+            }`}
           >
             <Network size={24} className="shrink-0" />
             <span className="truncate">家族樹狀圖</span>
           </button>
+
+          <button
+            onClick={() => handleNavClick('members')}
+            className={`flex items-center gap-4 p-4 rounded-xl text-lg font-medium transition-all ${
+              currentView === 'members'
+                ? 'bg-[var(--accent)] text-[#5D4037]'
+                : 'hover:bg-slate-50 text-[var(--text-muted)]'
+            }`}
+          >
+            <Users size={24} className="shrink-0" />
+            <span className="truncate">成員管理</span>
+          </button>
+
           <button
             onClick={() => handleNavClick('calendar')}
-            className={`flex items-center gap-4 p-4 rounded-xl text-lg font-medium transition-all ${currentView === 'calendar'
-              ? 'bg-[var(--accent)] text-[#5D4037]'
-              : 'hover:bg-slate-50 text-[var(--text-muted)]'
-              }`}
+            className={`flex items-center gap-4 p-4 rounded-xl text-lg font-medium transition-all ${
+              currentView === 'calendar'
+                ? 'bg-[var(--accent)] text-[#5D4037]'
+                : 'hover:bg-slate-50 text-[var(--text-muted)]'
+            }`}
           >
             <Calendar size={24} className="shrink-0" />
             <span className="truncate">壽星月曆</span>
           </button>
+
+          {onManualSync && (
+            <button
+              onClick={() => {
+                onManualSync();
+                setIsMobileMenuOpen(false);
+              }}
+              disabled={isSyncing}
+              className="flex items-center gap-4 p-4 rounded-xl text-lg font-medium text-amber-700 hover:bg-amber-50 transition-all"
+            >
+              <RefreshCw size={24} className={`shrink-0 ${isSyncing ? 'animate-spin' : ''}`} />
+              <span className="truncate">{isSyncing ? '同步中...' : '重新同步雲端'}</span>
+            </button>
+          )}
+
+          {onLock && (
+            <button
+              onClick={() => {
+                onLock();
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-4 p-4 rounded-xl text-lg font-medium text-rose-600 hover:bg-rose-50 transition-all"
+            >
+              <Lock size={24} className="shrink-0" />
+              <span className="truncate">鎖定離開</span>
+            </button>
+          )}
         </nav>
 
         <div className="mt-auto p-6 border-t border-slate-100 flex items-center justify-between">
           <button
             onClick={toggleTheme}
-            className="flex items-center gap-3 text-slate-500 font-medium"
+            className="flex items-center gap-3 text-slate-500 font-medium text-sm"
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
-            {isDarkMode ? '切換亮色模式' : '切換深色模式'}
+            {isDarkMode ? '切換亮色' : '切換深色'}
           </button>
-          <p className="text-xs text-slate-400">v1.0.4</p>
+          <p className="text-xs text-slate-400">v1.1.0</p>
         </div>
       </div>
     </div>
@@ -159,8 +204,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
           {/* Desktop Navigation (Centered Tabs) */}
           <nav className="hidden md:flex items-center gap-2">
             {[
-              { id: 'members', label: '成員管理', icon: Users },
               { id: 'tree', label: '家族樹', icon: Network },
+              { id: 'members', label: '成員管理', icon: Users },
               { id: 'calendar', label: '壽星月曆', icon: Calendar },
             ].map((item) => (
               <button
@@ -181,6 +226,30 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
+            {/* Sync Cloud Button */}
+            {onManualSync && (
+              <button
+                onClick={onManualSync}
+                disabled={isSyncing}
+                title={lastSyncTime ? `上次同步：${lastSyncTime.toLocaleTimeString()}` : '重新同步雲端資料'}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 transition-colors"
+              >
+                <RefreshCw size={14} className={isSyncing ? 'animate-spin' : ''} />
+                <span>{isSyncing ? '同步中...' : '同步雲端'}</span>
+              </button>
+            )}
+
+            {/* Lock Button */}
+            {onLock && (
+              <button
+                onClick={onLock}
+                title="鎖定系統（清除儲存的 PIN）"
+                className="p-2 rounded-full hover:bg-rose-50 dark:hover:bg-rose-950/30 text-[var(--text-muted)] hover:text-rose-600 transition-colors"
+              >
+                <Lock size={18} />
+              </button>
+            )}
+
             <button
               onClick={toggleTheme}
               className="p-2 rounded-full hover:bg-[var(--bg-card-hover)] text-[var(--text-muted)] transition-colors"
@@ -217,16 +286,12 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children, currentView, o
         >
           <button
             onClick={() => {
-              console.log('Calculator button clicked');
               onToggleCalculator();
             }}
-            className="p-4 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center animate-bounce-slow"
+            className="p-4 bg-violet-600 hover:bg-violet-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
             title="開啟稱謂計算機"
-            style={{ animationDuration: '3s' }}
           >
             <div className="relative">
-              <Calendar size={24} className="hidden" /> {/* Dummy to keep import valid if needed */}
-              {/* Calculator Icon */}
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" /><line x1="8" x2="16" y1="6" y2="6" /><line x1="16" x2="16" y1="14" y2="18" /><path d="M16 10h.01" /><path d="M12 10h.01" /><path d="M8 10h.01" /><path d="M12 14h.01" /><path d="M8 14h.01" /><path d="M12 18h.01" /><path d="M8 18h.01" /></svg>
             </div>
           </button>

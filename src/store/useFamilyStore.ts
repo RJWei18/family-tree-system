@@ -32,6 +32,10 @@ export const useFamilyStore = create<FamilyTreeState>()(
       removeRelationship: (id) => set((state) => ({
         relationships: state.relationships.filter((r) => r.id !== id)
       })),
+      setBatchFamilyData: (members, relationships) => set({
+        members,
+        relationships
+      }),
     }),
     {
       name: 'family-tree-storage',

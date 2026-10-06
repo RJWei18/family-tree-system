@@ -39,6 +39,7 @@ export interface FamilyTreeState {
   removeRelationship: (id: string) => void;
   highlightedMemberId: string | null;
   setHighlightedMemberId: (id: string | null) => void;
+  setBatchFamilyData: (members: Record<string, Member>, relationships: Relationship[]) => void;
   isDarkMode: boolean;
   toggleTheme: () => void;
 }

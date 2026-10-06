@@ -197,3 +197,66 @@ export const parseCSVFromURL = (url: string): Promise<{ members: Member[], relat
     });
   });
 };
+
+/**
+ * Fetches CSV from a URL and converts into full members map and relationship list
+ */
+export const fetchAndProcessCloudData = async (url: string): Promise<{
+  membersMap: Record<string, Member>;
+  relationships: Relationship[];
+  count: number;
+}> => {
+  const { members: importedMembers, relationships: rawRels } = await parseCSVFromURL(url);
+
+  const membersMap: Record<string, Member> = {};
+  importedMembers.forEach((m) => {
+    membersMap[m.id] = m;
+  });
+
+  const relationships: Relationship[] = [];
+
+  rawRels.forEach((rel) => {
+    const { memberId, fatherId, motherId, spouseId } = rel;
+
+    if (fatherId) {
+      relationships.push({
+        id: uuidv4(),
+        sourceMemberId: fatherId,
+        targetMemberId: memberId,
+        type: 'parent'
+      });
+    }
+
+    if (motherId) {
+      relationships.push({
+        id: uuidv4(),
+        sourceMemberId: motherId,
+        targetMemberId: memberId,
+        type: 'parent'
+      });
+    }
+
+    if (spouseId) {
+      const exists = relationships.find(
+        (r) =>
+          (r.sourceMemberId === memberId && r.targetMemberId === spouseId && r.type === 'spouse') ||
+          (r.sourceMemberId === spouseId && r.targetMemberId === memberId && r.type === 'spouse')
+      );
+      if (!exists) {
+        relationships.push({
+          id: uuidv4(),
+          sourceMemberId: memberId,
+          targetMemberId: spouseId,
+          type: 'spouse'
+        });
+      }
+    }
+  });
+
+  return {
+    membersMap,
+    relationships,
+    count: importedMembers.length
+  };
+};
+

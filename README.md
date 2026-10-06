@@ -40,13 +40,23 @@
 npm install
 ```
 
-### 3. 啟動開發伺服器
+### 3. 設定 8 碼安全 PIN 碼與 Google Sheet 網址 (端對端 AES 加密)
+```bash
+# 執行加密小工具產生密文
+node scripts/encrypt-url.js 88889999 "https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" [可選MasterKey]
+```
+將輸出的密文填入 `.env` 或 `src/config/familyConfig.ts`：
+```env
+VITE_ENCRYPTED_SHEET_URL="<產生的Base64密文>"
+```
+
+### 4. 啟動開發伺服器
 ```bash
 npm run dev
 ```
 打開瀏覽器訪問 `http://localhost:5173`。
 
-### 4. 部署 (GitHub Pages)
+### 5. 部署至 GitHub Pages
 ```bash
 npm run deploy
 ```
