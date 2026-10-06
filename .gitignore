@@ -125,3 +125,4 @@ dist
 
 # Gemini
 .gemini/
+fixtures/local/
