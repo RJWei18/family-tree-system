@@ -72,14 +72,8 @@ const HourglassGraph = () => {
 
         // Map node types to React Flow types
         const reactFlowNodes = flowData.nodes.map(n => {
-            let type = 'custom';
-            if (n.type === 'heart') type = 'heart';
-            else if (n.type === 'ghost') type = 'ghost';
-            else if (n.type === 'badge') type = 'hgBadge';
-
             return {
                 ...n,
-                type,
                 // Add highlight state for member and ghost nodes
                 data: {
                     ...n.data,
