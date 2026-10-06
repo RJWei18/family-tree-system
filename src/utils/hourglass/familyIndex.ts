@@ -1,5 +1,5 @@
-import { Member, Relationship } from '../../types';
-import { FamilyIndex } from './types';
+import type { Member, Relationship } from '../../types';
+import type { FamilyIndex } from './types';
 
 export const buildFamilyIndex = (
   members: Record<string, Member>,

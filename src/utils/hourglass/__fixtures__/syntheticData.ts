@@ -1,6 +1,6 @@
-import { Member, Relationship } from '../../../types';
+import type { Member, Relationship } from '../../../types';
 
-export const generateFamily = (seed: number, opts: any) => {
+export const generateFamily = (_seed: number, _opts: any) => {
   // basic stub for random generator, enough to compile and run
   const members: Record<string, Member> = {};
   const relationships: Relationship[] = [];

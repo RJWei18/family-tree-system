@@ -1,4 +1,4 @@
-import { HourglassModel, Unit, ParentLink, BadgeSpec, FamilyIndex } from './types';
+import type { HourglassModel, Unit, FamilyIndex } from './types';
 import {
   MEMBER_WIDTH,
   HEART_WIDTH,
@@ -40,7 +40,7 @@ interface Extent {
   right: number;
 }
 
-export function layoutHourglass(model: HourglassModel, index: FamilyIndex): LayoutResult {
+export function layoutHourglass(model: HourglassModel, _index: FamilyIndex): LayoutResult {
   const nodes: PositionedNode[] = [];
   const edges: PositionedEdge[] = [];
   
@@ -232,7 +232,7 @@ export function layoutHourglass(model: HourglassModel, index: FamilyIndex): Layo
       
       // Heart
       if (i < unit.members.length - 1) {
-        const hasSpouseLink = model.links.some(l => l.fromUnitId === unit.id && l.fromPair.includes(m.id) && l.fromPair.includes(unit.members[i+1].id));
+        // const hasSpouseLink = model.links.some(l => l.fromUnitId === unit.id && l.fromPair.includes(m.id) && l.fromPair.includes(unit.members[i+1].id));
         const isSpousePair = true; // In this domain they are all adjacent spouses unless not linked
         if (isSpousePair) { // Should check actual spouses
           const nextCx = startX + (i+1) * SLOT_WIDTH + SLOT_WIDTH/2;

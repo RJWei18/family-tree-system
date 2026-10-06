@@ -1,5 +1,5 @@
-import { LayoutResult } from './hourglassLayout';
-import { Node, Edge } from 'reactflow';
+import type { LayoutResult } from './hourglassLayout';
+import type { Node, Edge } from 'reactflow';
 
 export function toFlow(result: LayoutResult): { nodes: Node[], edges: Edge[] } {
   return {

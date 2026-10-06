@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { buildFamilyIndex } from '../familyIndex';
-import { Member, Relationship } from '../../../types';
+import type { Member, Relationship } from '../../../types';
 
 describe('familyIndex', () => {
   it('should ignore missing members, self relationships, and handle duplicates', () => {

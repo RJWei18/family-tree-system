@@ -1,8 +1,10 @@
 import React from 'react';
 import { FamilyGraph } from '../components/tree/FamilyGraph';
+import { HourglassView } from '../components/tree/hourglass/HourglassView';
 import { QuickAddModal } from '../components/members/QuickAddModal';
 import { useUIStore } from '../store/useUIStore';
 import { useFamilyStore } from '../store/useFamilyStore';
+import { ViewModeSwitch } from '../components/tree/ViewModeSwitch';
 import { v4 as uuidv4 } from 'uuid';
 import type { Member } from '../types';
 
@@ -10,7 +12,8 @@ export const FamilyTree: React.FC = () => {
    const {
       isQuickAddOpen,
       quickAddSourceId,
-      closeQuickAdd
+      closeQuickAdd,
+      treeMode
    } = useUIStore();
 
    const members = useFamilyStore((state) => state.members);
@@ -47,8 +50,9 @@ export const FamilyTree: React.FC = () => {
 
    return (
       <div className="w-full h-full flex flex-col flex-1 min-h-0">
-         <div className="h-14 border-b border-slate-200 flex items-center px-6 bg-white/80 backdrop-blur-sm z-10 shrink-0">
+         <div className="h-14 border-b border-slate-200 flex items-center justify-between px-6 bg-white/80 backdrop-blur-sm z-10 shrink-0">
             <h2 className="font-bold text-slate-700">家族樹狀圖 (Family Tree Visualization)</h2>
+            <ViewModeSwitch />
          </div>
          {/* Use flex-1 to fill remaining space explicitly */}
          <div className="flex-1 bg-slate-50 relative w-full overflow-hidden flex flex-col">
@@ -59,7 +63,7 @@ export const FamilyTree: React.FC = () => {
                   backgroundSize: '24px 24px'
                }}
             />
-            <FamilyGraph />
+            {treeMode === 'hourglass' ? <HourglassView /> : <FamilyGraph />}
 
             <QuickAddModal
                isOpen={isQuickAddOpen}

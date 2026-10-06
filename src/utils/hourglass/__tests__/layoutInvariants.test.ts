@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { layoutHourglass } from '../hourglassLayout';
-import { HourglassModel } from '../types';
-import { MEMBER_WIDTH, SIBLING_GAP } from '../constants';
+import type { HourglassModel } from '../types';
+import { MEMBER_WIDTH } from '../constants';
 
 describe('Layout Invariants', () => {
   it('I1: next.left - prev.right >= 40', () => {

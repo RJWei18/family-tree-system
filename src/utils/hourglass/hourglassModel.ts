@@ -1,4 +1,4 @@
-import { FamilyIndex, HourglassOptions, HourglassModel, Unit, ParentLink, BadgeSpec, UnitMember, UnitRole } from './types';
+import type { FamilyIndex, HourglassOptions, HourglassModel, Unit, ParentLink, BadgeSpec, UnitMember } from './types';
 
 export const buildHourglassModel = (index: FamilyIndex, opts: HourglassOptions): HourglassModel => {
   const { members, parentsOf, childrenOf, spousesOf } = index;
