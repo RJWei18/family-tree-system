@@ -227,7 +227,7 @@ export function layoutHourglass(model: HourglassModel, _index: FamilyIndex): Lay
         width: MEMBER_WIDTH,
         height: 100,
         row: unit.row,
-        payload: { memberId: m.id }
+        payload: _index.members[m.id] || { id: m.id, firstName: '未知', lastName: '' }
       });
       
       // Heart
