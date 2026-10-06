@@ -82,23 +82,23 @@ export const HourglassToolbar: React.FC = () => {
           </button>
         </div>
 
-        <div className="flex items-center gap-2 text-sm border-l pl-4">
-          <label className="flex items-center gap-1">
+        <div className="flex items-center gap-2 text-sm border-l pl-4 shrink-0">
+          <label className="flex items-center gap-1 shrink-0">
             上代:
             <select 
               value={ancestorDepth} 
               onChange={e => setAncestorDepth(Number(e.target.value))}
-              className="border rounded p-1"
+              className="border rounded p-1 text-base sm:text-sm"
             >
               {[2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}
             </select>
           </label>
-          <label className="flex items-center gap-1">
+          <label className="flex items-center gap-1 shrink-0">
             下代:
             <select 
               value={descendantDepth === null ? 'all' : descendantDepth} 
               onChange={e => setDescendantDepth(e.target.value === 'all' ? null : Number(e.target.value))}
-              className="border rounded p-1"
+              className="border rounded p-1 text-base sm:text-sm"
             >
               {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}
               <option value="all">全部</option>
@@ -106,12 +106,12 @@ export const HourglassToolbar: React.FC = () => {
           </label>
         </div>
 
-        <div className="flex items-center border-l pl-4">
+        <div className="flex items-center border-l pl-4 shrink-0">
           <button 
             onClick={() => setHome(focusId)}
-            className="flex items-center gap-1 px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded"
+            className="flex items-center gap-1 px-3 py-1 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded whitespace-nowrap"
           >
-            <Home className="w-4 h-4" />
+            <Home className="w-4 h-4 shrink-0" />
             設為首頁
           </button>
         </div>

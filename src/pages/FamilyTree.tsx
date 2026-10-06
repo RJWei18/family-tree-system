@@ -50,9 +50,11 @@ export const FamilyTree: React.FC = () => {
 
    return (
       <div className="w-full h-full flex flex-col flex-1 min-h-0">
-         <div className="h-14 border-b border-slate-200 flex items-center justify-between px-6 bg-white/80 backdrop-blur-sm z-10 shrink-0">
-            <h2 className="font-bold text-slate-700">家族樹狀圖 (Family Tree Visualization)</h2>
-            <ViewModeSwitch />
+         <div className="min-h-14 py-2 border-b border-slate-200 flex flex-wrap gap-2 items-center justify-between px-4 sm:px-6 bg-white/80 backdrop-blur-sm z-10 shrink-0">
+            <h2 className="font-bold text-slate-700 text-sm sm:text-base truncate flex-1 min-w-[200px]">家族樹狀圖 <span className="hidden sm:inline">(Family Tree Visualization)</span></h2>
+            <div className="shrink-0">
+               <ViewModeSwitch />
+            </div>
          </div>
          {/* Use flex-1 to fill remaining space explicitly */}
          <div className="flex-1 bg-slate-50 relative w-full overflow-hidden flex flex-col">

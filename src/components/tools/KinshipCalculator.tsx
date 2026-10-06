@@ -69,7 +69,7 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
                     <div className="space-y-2">
                         <label className="block text-xs font-bold text-[#8D6E63] uppercase tracking-wider ml-1">出發點 (我是...)</label>
                         <select
-                            className="w-full bg-white border-2 border-transparent focus:border-[#FAD089] text-[#5D4037] font-bold text-base py-3 px-4 rounded-xl outline-none transition-all shadow-sm appearance-none cursor-pointer hover:bg-white/80"
+                            className="w-full bg-white border-2 border-transparent focus:border-[#FAD089] text-[#5D4037] font-bold text-lg md:text-base py-3 px-4 rounded-xl outline-none transition-all shadow-sm appearance-none cursor-pointer hover:bg-white/80"
                             value={personA}
                             onChange={(e) => setPersonA(e.target.value)}
                         >
@@ -96,7 +96,7 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
                     <div className="space-y-2">
                         <label className="block text-xs font-bold text-[#8D6E63] uppercase tracking-wider ml-1">對象 (他是我的...)</label>
                         <select
-                            className="w-full bg-white border-2 border-transparent focus:border-[#FAD089] text-[#5D4037] font-bold text-base py-3 px-4 rounded-xl outline-none transition-all shadow-sm appearance-none cursor-pointer hover:bg-white/80"
+                            className="w-full bg-white border-2 border-transparent focus:border-[#FAD089] text-[#5D4037] font-bold text-lg md:text-base py-3 px-4 rounded-xl outline-none transition-all shadow-sm appearance-none cursor-pointer hover:bg-white/80"
                             value={personB}
                             onChange={(e) => setPersonB(e.target.value)}
                         >
