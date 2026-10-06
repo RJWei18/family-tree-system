@@ -1,8 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useFamilyStore } from '../../store/useFamilyStore';
 import { calculateRelationship } from '../../utils/kinship';
-import { X, Calculator, ArrowRightLeft } from 'lucide-react';
+import { X, Calculator, ArrowRightLeft, ChevronDown } from 'lucide-react';
+import type { Member } from '../../types';
+
+interface MemberSelectProps {
+    value: string;
+    onChange: (value: string) => void;
+    options: Member[];
+    placeholder: string;
+}
+
+const MemberSelect: React.FC<MemberSelectProps> = ({ value, onChange, options, placeholder }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    const selectedOption = options.find(o => o.id === value);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [isOpen]);
+
+    return (
+        <div className="relative" ref={containerRef}>
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full bg-white border-2 border-transparent focus:border-[#FAD089] text-[#5D4037] font-bold text-lg md:text-base py-3 px-4 rounded-xl outline-none transition-all shadow-sm cursor-pointer hover:bg-white/80 flex justify-between items-center text-left"
+            >
+                <span className={selectedOption ? '' : 'text-gray-400'}>
+                    {selectedOption 
+                        ? `${selectedOption.lastName || ''}${selectedOption.firstName || ''} ${selectedOption.dateOfBirth ? `(${new Date(selectedOption.dateOfBirth).getFullYear()})` : ''}`.trim()
+                        : placeholder}
+                </span>
+                <ChevronDown size={20} className={`transition-transform duration-200 text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {isOpen && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl z-[100005] max-h-64 overflow-y-auto border border-gray-100 divide-y divide-gray-50">
+                    {options.map(m => {
+                        const isSelected = m.id === value;
+                        return (
+                            <div
+                                key={m.id}
+                                onClick={() => {
+                                    onChange(m.id);
+                                    setIsOpen(false);
+                                }}
+                                className={`px-4 py-3 cursor-pointer text-lg md:text-base transition-colors hover:bg-[#FFFBF0] ${
+                                    isSelected ? 'bg-[#FAD089]/20 font-bold text-[#5D4037]' : 'text-gray-700'
+                                }`}
+                            >
+                                {m.lastName || ''}{m.firstName || ''} {m.dateOfBirth ? `(${new Date(m.dateOfBirth).getFullYear()})` : ''}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+};
 
 interface KinshipCalculatorProps {
     isOpen: boolean;
@@ -68,18 +132,12 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
                     {/* Person A */}
                     <div className="space-y-2">
                         <label className="block text-xs font-bold text-[#8D6E63] uppercase tracking-wider ml-1">出發點 (我是...)</label>
-                        <select
-                            className="w-full bg-white border-2 border-transparent focus:border-[#FAD089] text-[#5D4037] font-bold text-lg md:text-base py-3 px-4 rounded-xl outline-none transition-all shadow-sm appearance-none cursor-pointer hover:bg-white/80"
+                        <MemberSelect
                             value={personA}
-                            onChange={(e) => setPersonA(e.target.value)}
-                        >
-                            <option value="">請選擇成員</option>
-                            {memberList.map(m => (
-                                <option key={m.id} value={m.id}>
-                                    {m.firstName} {m.dateOfBirth ? `(${new Date(m.dateOfBirth).getFullYear()})` : ''}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={setPersonA}
+                            options={memberList}
+                            placeholder="請選擇成員"
+                        />
                     </div>
 
                     <div className="flex justify-center -my-3 z-10 relative">
@@ -95,18 +153,12 @@ export const KinshipCalculator: React.FC<KinshipCalculatorProps> = ({ isOpen, on
                     {/* Person B */}
                     <div className="space-y-2">
                         <label className="block text-xs font-bold text-[#8D6E63] uppercase tracking-wider ml-1">對象 (他是我的...)</label>
-                        <select
-                            className="w-full bg-white border-2 border-transparent focus:border-[#FAD089] text-[#5D4037] font-bold text-lg md:text-base py-3 px-4 rounded-xl outline-none transition-all shadow-sm appearance-none cursor-pointer hover:bg-white/80"
+                        <MemberSelect
                             value={personB}
-                            onChange={(e) => setPersonB(e.target.value)}
-                        >
-                            <option value="">請選擇成員</option>
-                            {memberList.map(m => (
-                                <option key={m.id} value={m.id}>
-                                    {m.firstName} {m.dateOfBirth ? `(${new Date(m.dateOfBirth).getFullYear()})` : ''}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={setPersonB}
+                            options={memberList}
+                            placeholder="請選擇成員"
+                        />
                     </div>
 
                     {/* Result with Ribbon Style */}
