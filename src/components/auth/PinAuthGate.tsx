@@ -648,7 +648,7 @@ export const PinAuthGate: React.FC<PinAuthGateProps> = ({ onSuccess, isLoadingDa
                   type="password"
                   value={helperPin}
                   onChange={(e) => setHelperPin(e.target.value)}
-                  placeholder="要設定的新 PIN 碼 (如 09131118)"
+                  placeholder="要設定的新 PIN 碼 (如 12345678)"
                   style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
                 />
                 <textarea
@@ -658,6 +658,10 @@ export const PinAuthGate: React.FC<PinAuthGateProps> = ({ onSuccess, isLoadingDa
                   placeholder="輸入正確的 Google Sheet 發布網址"
                   style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '12px', fontFamily: 'monospace', boxSizing: 'border-box', resize: 'none', outline: 'none' }}
                 />
+                <div style={{ fontSize: '11px', color: '#64748b', lineHeight: '1.5', padding: '0 4px' }}>
+                  <span style={{color: '#d97706'}}>💡 取得網址：</span>檔案 ➜ 共用 ➜ 發布到網路 ➜ 選指定工作表 ➜ 選 CSV<br/>
+                  <span style={{color: '#ef4444'}}>⚠️ 權限注意：</span>一般存取權需設為「知道連結的任何人」，並取消勾選「要求檢視者登入」
+                </div>
                 <button
                   type="submit"
                   disabled={!helperPin.trim() || !helperUrl.trim()}
