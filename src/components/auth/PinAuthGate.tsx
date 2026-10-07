@@ -50,21 +50,36 @@ export const PinAuthGate: React.FC<PinAuthGateProps> = ({ onSuccess, isLoadingDa
     try {
       let resolvedUrl: string | null = null;
 
-      // 1. Try decrypting standard payload
-      if (encryptedUrl) {
+      // Handle both string and array for sheet URLs
+      const sheetUrls = Array.isArray(encryptedUrl) 
+        ? encryptedUrl 
+        : encryptedUrl ? [encryptedUrl] : [];
+
+      // 1. Try decrypting standard payload(s)
+      for (const url of sheetUrls) {
+        if (!url) continue;
         try {
-          resolvedUrl = await decryptUrl(encryptedUrl, cleanPin);
+          resolvedUrl = await decryptUrl(url, cleanPin);
+          if (resolvedUrl) break;
         } catch {
-          // Fallback to master
+          // Continue trying next
         }
       }
 
-      // 2. Try decrypting master payload if first failed
+      // 2. Try decrypting master payload(s) if first failed
       if (!resolvedUrl && encryptedMasterUrl) {
-        try {
-          resolvedUrl = await decryptUrl(encryptedMasterUrl, cleanPin);
-        } catch {
-          // Failed
+        const masterUrls = Array.isArray(encryptedMasterUrl)
+          ? encryptedMasterUrl
+          : [encryptedMasterUrl];
+          
+        for (const url of masterUrls) {
+          if (!url) continue;
+          try {
+            resolvedUrl = await decryptUrl(url, cleanPin);
+            if (resolvedUrl) break;
+          } catch {
+            // Failed
+          }
         }
       }
 
