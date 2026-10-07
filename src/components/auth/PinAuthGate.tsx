@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Lock, KeyRound, HelpCircle, ShieldAlert, ArrowRight, RefreshCw, Smartphone } from 'lucide-react';
-import { decryptUrl } from '../../utils/cryptoHelpers';
+import { Lock, KeyRound, HelpCircle, ShieldAlert, ArrowRight, RefreshCw, Smartphone, Copy, Check } from 'lucide-react';
+import { decryptUrl, encryptUrl } from '../../utils/cryptoHelpers';
 import { familyConfig } from '../../config/familyConfig';
 
 interface PinAuthGateProps {
@@ -17,6 +17,12 @@ export const PinAuthGate: React.FC<PinAuthGateProps> = ({ onSuccess, isLoadingDa
   const [showRescueModal, setShowRescueModal] = useState(false);
   const [directUrl, setDirectUrl] = useState('');
   const [rescueKey, setRescueKey] = useState('');
+  
+  // Encrypt Helper States
+  const [helperPin, setHelperPin] = useState('');
+  const [helperUrl, setHelperUrl] = useState('');
+  const [helperResult, setHelperResult] = useState('');
+  const [helperCopied, setHelperCopied] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const encryptedUrl = familyConfig.encryptedSheetUrl || localStorage.getItem('family_tree_encrypted_url') || '';
@@ -114,6 +120,23 @@ export const PinAuthGate: React.FC<PinAuthGateProps> = ({ onSuccess, isLoadingDa
     e.preventDefault();
     if (!directUrl.trim()) return;
     onSuccess(directUrl.trim());
+  };
+
+  const handleEncryptGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!helperPin.trim() || !helperUrl.trim()) return;
+    try {
+      const result = await encryptUrl(helperUrl.trim(), helperPin.trim());
+      setHelperResult(result);
+    } catch (err) {
+      alert("加密失敗：" + String(err));
+    }
+  };
+
+  const copyHelperResult = () => {
+    navigator.clipboard.writeText(helperResult);
+    setHelperCopied(true);
+    setTimeout(() => setHelperCopied(false), 2000);
   };
 
   const handleRescueKeySubmit = async (e: React.FormEvent) => {
@@ -606,6 +629,62 @@ export const PinAuthGate: React.FC<PinAuthGateProps> = ({ onSuccess, isLoadingDa
                 直接載入此試算表
               </button>
             </form>
+
+            {/* Option 3: Encryption Helper */}
+            <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid #f1f5f9' }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: '#475569',
+                  marginBottom: '8px'
+                }}
+              >
+                方案 3：開發者加密小幫手
+              </label>
+              <form onSubmit={handleEncryptGenerate} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <input
+                  type="password"
+                  value={helperPin}
+                  onChange={(e) => setHelperPin(e.target.value)}
+                  placeholder="要設定的新 PIN 碼 (如 09131118)"
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }}
+                />
+                <textarea
+                  rows={2}
+                  value={helperUrl}
+                  onChange={(e) => setHelperUrl(e.target.value)}
+                  placeholder="輸入正確的 Google Sheet 發布網址"
+                  style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1px solid #cbd5e1', fontSize: '12px', fontFamily: 'monospace', boxSizing: 'border-box', resize: 'none', outline: 'none' }}
+                />
+                <button
+                  type="submit"
+                  disabled={!helperPin.trim() || !helperUrl.trim()}
+                  style={{ padding: '8px', borderRadius: '8px', backgroundColor: (helperPin.trim() && helperUrl.trim()) ? '#0f172a' : '#e2e8f0', color: '#fff', border: 'none', fontSize: '12px', cursor: (helperPin.trim() && helperUrl.trim()) ? 'pointer' : 'not-allowed' }}
+                >
+                  產生安全密文
+                </button>
+              </form>
+              
+              {helperResult && (
+                <div style={{ marginTop: '10px', position: 'relative' }}>
+                  <textarea
+                    readOnly
+                    value={helperResult}
+                    rows={4}
+                    style={{ width: '100%', padding: '8px 10px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '11px', fontFamily: 'monospace', color: '#334155', boxSizing: 'border-box', resize: 'none' }}
+                  />
+                  <button
+                    onClick={copyHelperResult}
+                    style={{ position: 'absolute', top: '8px', right: '8px', padding: '6px 10px', borderRadius: '6px', backgroundColor: helperCopied ? '#22c55e' : '#e2e8f0', color: helperCopied ? '#fff' : '#475569', border: 'none', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    {helperCopied ? <Check size={12} /> : <Copy size={12} />}
+                    {helperCopied ? '已複製' : '複製密文'}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
