@@ -161,7 +161,7 @@ const HourglassGraph = () => {
                     proOptions={{ hideAttribution: true }}
                 >
                     <Controls className="!bottom-20 !left-4" />
-                    <MiniMap className="!bottom-20 !right-4" />
+                    <MiniMap className="hidden sm:block !bottom-20 !right-4" />
                 </ReactFlow>
 
                 <div className="absolute top-4 left-4 z-10 w-64">

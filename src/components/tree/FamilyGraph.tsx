@@ -153,6 +153,7 @@ const FamilyGraphContent: React.FC = () => {
             >
                 <Controls className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-slate-600 dark:text-slate-400 fill-slate-600 dark:fill-slate-400" />
                 <MiniMap
+                    className="hidden sm:block"
                     style={{
                         background: isDarkMode ? 'rgba(30, 41, 59, 0.8)' : 'rgba(255,255,255,0.8)',
                         border: isDarkMode ? '1px solid #334155' : '1px solid #e2e8f0'
